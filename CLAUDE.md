@@ -46,6 +46,7 @@
 - **Leaflet 지도 생명주기**: ①컨테이너 폭 0 시점에 heatLayer를 add하면 IndexSizeError로 초기화가 중단되고 `_leaflet_id`가 남아 이후 `L.map()`이 영구 실패 → `el.clientWidth` 가드 + 재생성 전 `_leaflet_id`/innerHTML 강제 정리 ②지도 정리는 페이지를 **떠나기 전**(컨테이너가 문서에 있을 때) `_go()`에서 수행. 고속 전환 12회당 CORS 마스킹된 "Script error." 1건은 잔존(무해·자가 복구) — 수용
 - **브라우저 캐시**: .dc.html 수정 후 같은 URL 재방문은 캐시 렌더될 수 있음 — 검증 시 `?v=N` 쿼리로 강제 리로드 (dc 런타임은 pathname만 사용하므로 쿼리 안전)
 - **시민 페이지는 모바일 필수**: 인라인 grid는 미디어쿼리 불가 → helmet `<style>`의 클래스(`pub-grid-main` 등)로. 375/768 검증 완료
+- **그리드 + 캔버스 = minmax(0,1fr) 필수**: 1fr 트랙은 캔버스 min-content에 밀려 리사이즈(기기 회전) 시 줄어들지 않는다 → `minmax(0,1fr)` + 자식 `min-width:0`. 시민 페이지에서 실제 발생·수정
 
 ## 남은 일 (후보)
 

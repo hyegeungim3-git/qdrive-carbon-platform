@@ -40,6 +40,9 @@
     button:hover{filter:brightness(0.96);}
     button:active{filter:brightness(0.92);}
     button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+    }
   </style>
 </helmet>
 
@@ -1185,7 +1188,7 @@
               <span style="width:7px;height:7px;border-radius:50%;background:#7ee2a8;animation:livePulse 1.6s infinite;"></span>오늘 06:00 아침 브리핑
             </span>
             <span style="font-size:14px;font-weight:700;">에이전트 4개가 밤새 412대 · 486명의 데이터를 분석했어요</span>
-            <span style="margin-left:auto;font-size:12px;font-weight:600;color:#b0b8c1;">수행 작업 1,847건 · 승인 대기 3건</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:600;color:#b0b8c1;">수행 작업 1,847건 · 승인 대기 {{ apprPendingCount }}건</span>
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
             <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;">
@@ -1258,7 +1261,7 @@
               <div style="font-size:16px;font-weight:700;">코파일럿에게 물어보기</div>
               <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">조회·분석 단계 공개</span>
             </div>
-            <div style="display:flex;flex-direction:column;gap:14px;min-height:200px;max-height:380px;overflow-y:auto;padding:2px;">
+            <div id="copilot-log" style="display:flex;flex-direction:column;gap:14px;min-height:200px;max-height:380px;overflow-y:auto;padding:2px;">
               <sc-if value="{{ chatEmpty }}" hint-placeholder-val="{{ true }}">
                 <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:36px 16px;text-align:center;font-size:13px;font-weight:600;color:var(--text-secondary);line-height:1.7;">아래 추천 질문을 눌러 보세요.<br>에이전트가 어떤 데이터를 어떻게 봤는지, 과정을 공개하며 답해요.</div>
               </sc-if>
@@ -1331,8 +1334,18 @@ class Component extends DCLogic {
       this._chatTimers.push(setTimeout(() => {
         const chat = this.state.chat.slice();
         if (chat[idx]) { chat[idx] = { ...chat[idx], phase: p }; this.setState({ chat }); }
+        this._scrollLog();
       }, p * 750));
     }
+    this._chatTimers.push(setTimeout(() => this._scrollLog(), 60));
+  }
+
+  _scrollLog() {
+    // setState 커밋 이후에 실행돼야 새 답변 높이가 반영된다
+    setTimeout(() => {
+      const el = document.getElementById("copilot-log");
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 90);
   }
 
   // 전환 시뮬레이터 — AI가 효과 큰 차량부터 선정하므로 대당 감축량은 한계 체감 (k번째 차량 = 36.5 - 0.3k tCO₂/년)
@@ -1709,7 +1722,9 @@ class Component extends DCLogic {
         const q = this.state.agentQ.trim();
         if (!q) return;
         this.setState({ chat: [...this.state.chat, { custom: q }], agentQ: "" });
+        this._scrollLog();
       },
+      apprPendingCount: apprRaw.filter((p, i) => !this.state.appr[i]).length,
       pageTitle: titles[dash][0], pageSub: titles[dash][1],
       systems, chips, routes, alerts, drivers, vehicles, anomalies, zones, recs,
       mgVehicles, predicts, fixLogs, driverChips, mgDrivers, eduTargets, routeStats,

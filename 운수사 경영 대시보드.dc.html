@@ -31,6 +31,9 @@
     button:hover{filter:brightness(0.96);}
     button:active{filter:brightness(0.92);}
     button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+    }
   </style>
 </helmet>
 

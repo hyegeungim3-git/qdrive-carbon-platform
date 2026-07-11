@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b2b18">
 <title>대구 시내버스 탄소 리포트 — 시민 대시보드</title>
 <meta name="description" content="대구 시내버스 412대가 안전운전으로 만든 탄소 감축 성과를 시민에게 공개하는 페이지">
 <meta property="og:type" content="website">
@@ -35,11 +36,18 @@
     button:hover{filter:brightness(0.96);}
     button:active{filter:brightness(0.92);}
     button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
-    .pub-grid-main{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;}
+    .pub-grid-main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;}
+    .pub-grid-main>*{min-width:0;}
+    .pub-grid-calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:stretch;}
+    .pub-grid-calc>*{min-width:0;}
     .pub-grid-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:760px;margin:44px auto 0;}
     .pub-hero-num{font-size:76px;font-weight:700;letter-spacing:-3px;line-height:1.1;margin-top:10px;font-variant-numeric:tabular-nums;}
     @media (max-width:760px){
-      .pub-grid-main{grid-template-columns:1fr;}
+      .pub-grid-main{grid-template-columns:minmax(0,1fr);}
+      .pub-grid-calc{grid-template-columns:minmax(0,1fr);}
+    }
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
     }
     @media (max-width:560px){
       .pub-grid-stats{grid-template-columns:1fr;gap:10px;margin-top:30px;}
@@ -68,8 +76,9 @@
 
       <div style="text-align:center;margin-top:52px;">
         <div style="font-size:16px;font-weight:700;color:#a7d9bd;">오늘, 대구 시내버스 412대가 아낀 탄소</div>
-        <div class="pub-hero-num">2.1<span style="font-size:30px;font-weight:700;letter-spacing:-0.5px;margin-left:6px;color:#a7d9bd;">tCO₂</span></div>
-        <div style="font-size:15px;font-weight:600;color:#cfe9db;margin-top:14px;line-height:1.6;">기사님들의 안전운전이 연료 784L를 아꼈어요.<br>과속·급가속이 줄면, 도시의 공기가 달라져요.</div>
+        <div class="pub-hero-num">{{ heroKg }}<span style="font-size:30px;font-weight:700;letter-spacing:-0.5px;margin-left:6px;color:#a7d9bd;">kg CO₂</span></div>
+        <div style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:#7ee2a8;margin-top:10px;"><span style="width:7px;height:7px;border-radius:50%;background:#7ee2a8;animation:livePulse 1.6s infinite;"></span>운행 중인 버스가 지금도 쌓는 중</div>
+        <div style="font-size:15px;font-weight:600;color:#cfe9db;margin-top:12px;line-height:1.6;">기사님들의 안전운전이 연료 784L를 아꼈어요.<br>과속·급가속이 줄면, 도시의 공기가 달라져요.</div>
       </div>
 
       <div class="pub-grid-stats">
@@ -136,6 +145,31 @@
       </div>
     </div>
 
+    <!-- 나의 절감 계산기 -->
+    <div class="pub-section" style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:17px;font-weight:700;">나도 버스로 바꾸면, 얼마나 아낄까요?</div>
+        <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:rgba(49,130,246,0.1);padding:4px 10px;border-radius:9999px;">승용차 대비 계산기</span>
+      </div>
+      <div class="pub-grid-calc" style="margin-top:16px;">
+        <div style="display:flex;flex-direction:column;justify-content:center;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;">
+            <span style="font-size:13.5px;font-weight:600;color:var(--text-body);">출퇴근 왕복 거리</span>
+            <span style="font-size:26px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">{{ calcKm }}<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:1px;">km</span></span>
+          </div>
+          <input type="range" min="2" max="60" value="{{ calcKm }}" onChange="{{ onCalcKm }}" style="width:100%;margin-top:14px;accent-color:var(--primary);cursor:pointer;height:28px;">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--text-placeholder);margin-top:4px;"><span>2km</span><span>60km</span></div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:10px;">주 5일, 연 240일 출근 기준이에요.</div>
+        </div>
+        <div style="background:rgba(3,178,108,0.07);border-radius:14px;padding:20px 22px;text-align:center;">
+          <div style="font-size:13px;font-weight:600;color:var(--text-secondary);">승용차 대신 버스를 타면, 1년에</div>
+          <div style="font-size:38px;font-weight:700;color:#03965c;font-variant-numeric:tabular-nums;letter-spacing:-1px;margin-top:6px;">{{ calcCo2 }}<span style="font-size:17px;font-weight:700;margin-left:3px;">kg CO₂</span></div>
+          <div style="font-size:14px;font-weight:700;margin-top:8px;">소나무 <span style="color:#03965c;">{{ calcPine }}그루</span>가 1년간 흡수하는 양이에요 🌲</div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:10px;">승용차 170g/km vs 시내버스 1인당 24g/km 기준</div>
+        </div>
+      </div>
+    </div>
+
     <!-- footer -->
     <div class="pub-section" style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
       <span style="font-size:11.5px;font-weight:500;color:var(--text-placeholder);line-height:1.6;">산정 기준 — 도입 전 12개월 연비 베이스라인 대비 실측 (OBD·DTG 교차 검증) · 배출계수 환경부 고시 · 소나무 환산 6.6kgCO₂/그루·년</span>
@@ -146,7 +180,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { route: 0 };
+  state = { route: 0, calcKm: 12, heroKg: 2143 };
 
   routes() {
     return [
@@ -169,7 +203,14 @@ class Component extends DCLogic {
     const routes = this.routes();
     const sel = routes[this.state.route];
     const gradeColor = { A: "#03b26c", B: "#3182f6", C: "#fe9800" }[sel.grade];
+    // 승용차 170g/km − 버스 1인당 24g/km = 146g/km 절감 × 연 240일
+    const calcCo2 = Math.round(this.state.calcKm * 240 * 0.146);
     return {
+      heroKg: this.state.heroKg.toLocaleString(),
+      calcKm: this.state.calcKm,
+      onCalcKm: (e) => this.setState({ calcKm: Math.max(2, Math.min(60, parseInt(e.target.value, 10) || 2)) }),
+      calcCo2: calcCo2.toLocaleString(),
+      calcPine: Math.round(calcCo2 / 6.6).toLocaleString(),
       routeChips: routes.map((r, i) => {
         const active = i === this.state.route;
         return { label: r.name, onClick: () => this.setState({ route: i }),
@@ -186,9 +227,13 @@ class Component extends DCLogic {
     };
   }
 
-  componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
+  componentDidMount() {
+    this._iv = setInterval(() => this._tick(), 250); this._tick();
+    // 히어로 카운터 라이브 — 운행 중인 버스가 계속 쌓는 연출
+    this._kgIv = setInterval(() => this.setState({ heroKg: this.state.heroKg + 1 + Math.floor(Math.random() * 3) }), 2500);
+  }
   componentDidUpdate() { this._tick(); }
-  componentWillUnmount() { clearInterval(this._iv); if (this._chart) { try { this._chart.destroy(); } catch (e) {} } }
+  componentWillUnmount() { clearInterval(this._iv); clearInterval(this._kgIv); if (this._chart) { try { this._chart.destroy(); } catch (e) {} } }
 
   _tick() {
     const C = window.Chart;

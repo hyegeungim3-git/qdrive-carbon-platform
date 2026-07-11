@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111418">
 <title>QDrive 기사앱 — 실시간 AI 코칭</title>
 <meta name="description" content="8인치 태블릿용 기사앱 프로토타입 — 내비형 실시간 코칭과 운행 리포트">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
@@ -35,6 +36,9 @@
     button:hover{filter:brightness(0.96);}
     button:active{filter:brightness(0.92);}
     button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+    }
   </style>
 </helmet>
 
@@ -191,15 +195,25 @@
               </div>
             </div>
 
-            <!-- bottom strip : 오늘 요약 (보조 정보) -->
-            <div style="grid-column:1;grid-row:2;background:#fff;border-radius:14px;padding:14px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;gap:10px;">
+            <!-- bottom strip : 오늘 요약 + 미션 -->
+            <div style="grid-column:1;grid-row:2;background:#fff;border-radius:14px;padding:14px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;gap:9px;">
               <div style="display:flex;align-items:baseline;justify-content:space-between;">
                 <span style="font-size:12.5px;font-weight:600;color:var(--text-secondary);">오늘 점수</span>
                 <span><span style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">96.2</span> <span style="font-size:12px;font-weight:700;color:var(--success);">▲ +0.6</span></span>
               </div>
               <div style="display:flex;align-items:baseline;justify-content:space-between;">
                 <span style="font-size:12.5px;font-weight:600;color:var(--text-secondary);">오늘 절감</span>
-                <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">연료 2.4L · CO₂ 6.3kg</span>
+                <span style="font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">연료 2.4L · CO₂ 6.3kg</span>
+              </div>
+              <div style="border-top:1px solid var(--divider);padding-top:9px;">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                  <span style="font-size:12.5px;font-weight:700;">🎯 오늘의 미션 — 공회전 5분 이하</span>
+                  <span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">2/3회차</span>
+                </div>
+                <div style="height:6px;border-radius:9999px;background:var(--grey-100);overflow:hidden;margin-top:7px;">
+                  <div style="width:67%;height:100%;border-radius:9999px;background:var(--primary);transition:width .5s;"></div>
+                </div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-top:5px;">남은 회차 모두 달성 시 <b style="color:var(--success);">+2,000원</b></div>
               </div>
             </div>
           </div>

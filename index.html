@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101623">
 <title>QDrive — AI 기반 탄소중립 운영 플랫폼 (데모)</title>
 <meta name="description" content="대구 시내버스 412대의 OBD·DTG 데이터로 안전운전→연료 절감→탄소 감축을 만드는 플랫폼 프로토타입 — 4개 이해관계자 화면 라이브 데모">
 <meta property="og:type" content="website">
@@ -112,6 +113,9 @@
     .how{grid-template-columns:1fr;}
     .screens{grid-template-columns:1fr;}
     h1{font-size:33px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
   }
   @media (max-width:520px){
     .hero{padding:44px 0 52px;}
