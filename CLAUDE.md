@@ -16,6 +16,13 @@
 | `시민 탄소 대시보드.dc.html` | 시민 공개 페이지 — 히어로 카운터·월별 차트·노선별 등급 조회 (독립 스크롤 페이지, 다크 히어로) |
 | `운수사 경영 대시보드.dc.html` | 세운버스(주) 경영진용 — 손익 효과 수식: 연료비 1,065만(18.4tCO₂↔6,870L×1,550원/L) + 예지정비 420만 − 인센티브 310만 = 월 순 +1,175만원. 관제 coRanks(-5.8% 1위)와 정합 |
 
+## 배포
+
+- 저장소: https://github.com/hyegeungim3-git/qdrive-carbon-platform (공개)
+- 라이브: https://hyegeungim3-git.github.io/qdrive-carbon-platform/ — Pages는 master 브랜치 루트에서 legacy 빌드, 푸시마다 자동 배포
+- `.nojekyll` 필수 (`_ds` 언더스코어 폴더가 Jekyll에서 제외되는 것 방지). `index.html`은 4화면 랜딩 허브
+- git identity는 저장소 로컬 설정 (hyegeungim3-git)
+
 ## 실행·검증
 
 - `.claude/launch.json`의 `qdrive-static` (python http.server, 포트 8734)으로 실행. `file://`이 아닌 HTTP로 열 것.
