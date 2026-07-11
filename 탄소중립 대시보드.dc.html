@@ -1260,7 +1260,24 @@
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
               <div style="font-size:16px;font-weight:700;">코파일럿에게 물어보기</div>
               <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">조회·분석 단계 공개</span>
+              <span style="margin-left:auto;"></span>
+              <sc-if value="{{ liveOn }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.1);padding:4px 10px;border-radius:9999px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);animation:livePulse 1.6s infinite;"></span>라이브 AI</span>
+              </sc-if>
+              <button onClick="{{ toggleKeyPanel }}" style="height:28px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-body);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none;">{{ keyBtnLabel }}</button>
             </div>
+            <sc-if value="{{ showKeyPanel }}" hint-placeholder-val="{{ false }}">
+              <div style="background:var(--grey-50);border-radius:12px;padding:13px 15px;margin-bottom:12px;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-body);line-height:1.6;">Anthropic API 키를 연결하면 자유 질문에 실제 Claude(claude-opus-4-8)가 이 화면의 운영 데이터를 근거로 답해요.<br><b>키는 이 브라우저의 localStorage에만 저장</b>되고, Anthropic API로만 전송돼요.</div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                  <input type="password" onChange="{{ onKeyDraft }}" value="{{ keyDraft }}" placeholder="sk-ant-..." style="flex:1;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:600;outline:none;background:#fff;color:var(--text-strong);">
+                  <button onClick="{{ onKeySave }}" style="height:36px;padding:0 14px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">연결</button>
+                  <sc-if value="{{ liveOn }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ onKeyClear }}" style="height:36px;padding:0 14px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--red-500);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">해제</button>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
             <div id="copilot-log" style="display:flex;flex-direction:column;gap:14px;min-height:200px;max-height:380px;overflow-y:auto;padding:2px;">
               <sc-if value="{{ chatEmpty }}" hint-placeholder-val="{{ true }}">
                 <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:36px 16px;text-align:center;font-size:13px;font-weight:600;color:var(--text-secondary);line-height:1.7;">아래 추천 질문을 눌러 보세요.<br>에이전트가 어떤 데이터를 어떻게 봤는지, 과정을 공개하며 답해요.</div>
@@ -1295,7 +1312,7 @@
 
         <div style="display:flex;align-items:flex-start;gap:10px;padding:14px 18px;background:var(--grey-50);border-radius:12px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span style="font-size:12px;font-weight:500;color:var(--text-secondary);line-height:1.6;">이 화면은 에이전트 UX 데모예요 — 실서비스에서는 LLM 에이전트가 실데이터와 도구(정비 예약·충전 스케줄·보고 제출 API)에 연결돼요. 모든 조치는 사람 승인 후에만 실행되고, 에이전트의 조회·분석 과정은 항상 기록·공개돼요.</span>
+          <span style="font-size:12px;font-weight:500;color:var(--text-secondary);line-height:1.6;">이 화면은 에이전트 UX 데모예요 — 실서비스에서는 LLM 에이전트가 실데이터와 도구(정비 예약·충전 스케줄·보고 제출 API)에 연결돼요. 코파일럿의 자유 질문은 우측 상단 '라이브 연결'로 실제 Claude에 직접 연결해 체험할 수 있어요(키는 브라우저에만 저장). 모든 조치는 사람 승인 후에만 실행되고, 에이전트의 조회·분석 과정은 항상 기록·공개돼요.</span>
         </div>
       </div>
       </sc-if>
@@ -1307,7 +1324,64 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { dash: "1", sys: "전체", drvFilter: "전체", vq: "", period: "월간", notif: false, unread: true, planN: 12, repSel: 0,
-    appr: {}, chat: [], agentQ: "" };
+    appr: {}, chat: [], agentQ: "", showKeyPanel: false, keyDraft: "" };
+
+  // 라이브 AI 키 — localStorage 전용 (저장소·코드에 절대 커밋 금지)
+  _apiKey() {
+    try { return localStorage.getItem("qdrive_api_key") || ""; } catch (e) { return ""; }
+  }
+
+  // 라이브 코파일럿의 근거 데이터 — 기획서 §4 정합 사전과 동일 수치
+  _copilotSystem() {
+    return "너는 QDrive(대구 시내버스 탄소중립 운영 플랫폼) 관제 센터의 운영 코파일럿이다. 아래 데모 데이터를 근거로 관제 관리자에게 한국어로 답한다.\n" +
+      "[운영] 시내버스 412대(경유 272·CNG 72·전기 68), 5개 운수사, 기사 486명, 현재 운행 356대.\n" +
+      "[7월 성과, 11일 기준] 연료 절감 27,100L, CO₂ 감축 72.6t(-4.7%), 연비 2.42→2.53km/L(+4.5%), 월 목표 75t 대비 페이스 102%, 연 누적 393.7t. 배출계수: 경유 2.68kgCO₂/L.\n" +
+      "[안전] 평균 안전점수 82.4(+2.1), 안전점수↔연비 상관 r=0.81. 위험 차량: 세진 2044호 연비 2.51→1.93km/L(-23%), 인젝터 이상 확률 91%, 7/14 정비 예약안 승인 대기 중.\n" +
+      "[전기 전환] AI가 효과순 선정, k번째 차량 연 감축 = 36.5-0.3k tCO₂. 대당 실투자 1.1억원(차량가 3.9억-보조금 2.8억). 6대 전환 = 연 214t, ROI 2.7년. KOC 크레딧 8,900원/t.\n" +
+      "[운수사] 절감률 1위 세운버스(-5.8%), 월 순효과 +1,175만원(연료비 1,065만+예지정비 420만-인센티브 310만).\n" +
+      "규칙: 2~4문장으로 간결하게, 수치 근거를 포함해 답하라. 위 데이터에 없는 내용은 데모 데이터 범위 밖이라고 정직하게 말하라. 수치를 지어내지 마라.";
+  }
+
+  // 자유 질문 → Claude API 직접 호출 (브라우저에서 사용자 본인 키로)
+  async _askLive(q) {
+    const idx = this.state.chat.length;
+    this.setState({ chat: [...this.state.chat, { custom: q, ans: null }], agentQ: "" });
+    this._scrollLog();
+    const setAns = (text) => {
+      const chat = this.state.chat.slice();
+      if (chat[idx]) { chat[idx] = { ...chat[idx], ans: text }; this.setState({ chat }); }
+      this._scrollLog();
+    };
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": this._apiKey(),
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-opus-4-8",
+          max_tokens: 1024,
+          system: this._copilotSystem(),
+          messages: [{ role: "user", content: q }],
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        if (res.status === 401) setAns("API 키가 유효하지 않아요 — '설정'에서 키를 다시 확인해 주세요.");
+        else if (res.status === 429) setAns("요청이 많아 잠시 제한됐어요 — 잠시 후 다시 시도해 주세요.");
+        else setAns("요청이 실패했어요: " + (data && data.error && data.error.message ? data.error.message : "HTTP " + res.status));
+        return;
+      }
+      if (data.stop_reason === "refusal") { setAns("이 질문에는 답변할 수 없어요."); return; }
+      const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n").trim();
+      setAns(text || "응답이 비어 있어요 — 다시 시도해 주세요.");
+    } catch (e) {
+      setAns("네트워크 오류가 발생했어요 — 인터넷 연결을 확인해 주세요.");
+    }
+  }
 
   // 코파일럿 사전 정의 Q&A — 실서비스에서는 LLM 에이전트가 실데이터로 답한다 (화면에 명시)
   copilotQA() {
@@ -1627,7 +1701,12 @@ class Component extends DCLogic {
 
     const qaDefs = this.copilotQA();
     const chat = this.state.chat.map(m => {
-      if (m.custom) return { q: m.custom, steps: [], answer: "데모에서는 아래 추천 질문 3개에 응답해요. 실서비스에서는 LLM 에이전트가 실데이터를 조회해 어떤 질문에도 답합니다." };
+      if (m.custom) {
+        if (m.ans === null) return { q: m.custom, answer: false,
+          steps: [{ label: "Claude가 운영 데이터를 검토하는 중…",
+            dotStyle: { width: 7, height: 7, borderRadius: "50%", flex: "none", background: "var(--primary)", animation: "livePulse 0.9s infinite" } }] };
+        return { q: m.custom, steps: [], answer: m.ans };
+      }
       const qa = qaDefs[m.qi];
       const visible = qa.steps.slice(0, Math.min(m.phase, qa.steps.length));
       return { q: qa.q,
@@ -1721,8 +1800,28 @@ class Component extends DCLogic {
       onAgentSend: () => {
         const q = this.state.agentQ.trim();
         if (!q) return;
-        this.setState({ chat: [...this.state.chat, { custom: q }], agentQ: "" });
+        if (this._apiKey()) { this._askLive(q); return; }
+        this.setState({ chat: [...this.state.chat, { custom: q,
+          ans: "데모 모드에서는 추천 질문 3개에 응답해요. 우측 상단 '라이브 연결'에 Anthropic API 키를 넣으면 실제 Claude가 이 화면의 운영 데이터를 근거로 어떤 질문에도 답해요." }], agentQ: "" });
         this._scrollLog();
+      },
+      liveOn: !!this._apiKey(),
+      showKeyPanel: this.state.showKeyPanel,
+      keyBtnLabel: this._apiKey() ? "설정" : "라이브 연결",
+      toggleKeyPanel: () => this.setState({ showKeyPanel: !this.state.showKeyPanel }),
+      keyDraft: this.state.keyDraft,
+      onKeyDraft: (e) => this.setState({ keyDraft: e.target.value }),
+      onKeySave: () => {
+        const k = this.state.keyDraft.trim();
+        if (!k) return;
+        try { localStorage.setItem("qdrive_api_key", k); } catch (e) {}
+        this.setState({ showKeyPanel: false, keyDraft: "" });
+        this._toast("라이브 AI가 연결됐어요 — 자유 질문에 Claude가 답해요");
+      },
+      onKeyClear: () => {
+        try { localStorage.removeItem("qdrive_api_key"); } catch (e) {}
+        this.setState({ showKeyPanel: false, keyDraft: "" });
+        this._toast("라이브 AI 연결을 해제했어요 — 데모 모드로 전환");
       },
       apprPendingCount: apprRaw.filter((p, i) => !this.state.appr[i]).length,
       pageTitle: titles[dash][0], pageSub: titles[dash][1],
