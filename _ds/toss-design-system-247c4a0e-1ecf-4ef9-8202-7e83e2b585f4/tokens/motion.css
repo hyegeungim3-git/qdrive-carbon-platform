@@ -1,0 +1,29 @@
+/* ============================================================
+   MOTION — durations + easings.
+   Spring easing is licensed for ONE place only: the money-moved
+   success checkmark. Everywhere else, standard easing.
+   ============================================================ */
+
+:root {
+  /* ---- Durations ---- */
+  --motion-instant:  0ms;     /* @kind other */ /* toggle flips */
+  --motion-fast:     150ms;   /* @kind other */ /* hover, focus, press */
+  --motion-standard: 250ms;   /* @kind other */ /* default transitions */
+  --motion-slow:     400ms;   /* @kind other */ /* success, onboarding */
+  --motion-page:     350ms;   /* @kind other */ /* route transitions */
+
+  /* ---- Easings ---- */
+  --ease-enter:    cubic-bezier(0.0, 0.0, 0.2, 1);   /* @kind other */ /* appearing */
+  --ease-exit:     cubic-bezier(0.4, 0.0, 1, 1);     /* @kind other */ /* leaving */
+  --ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);   /* @kind other */ /* two-way */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);/* @kind other */ /* money-moved */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast:     0ms; /* @kind other */
+    --motion-standard: 0ms; /* @kind other */
+    --motion-slow:     0ms; /* @kind other */
+    --motion-page:     0ms; /* @kind other */
+  }
+}

@@ -1,0 +1,26 @@
+/* ============================================================
+   BASE — light resets + default document type.
+   Kept minimal; consumers opt in by linking styles.css.
+   ============================================================ */
+
+:root {
+  font-family: var(--font-sans);
+  color: var(--text-strong);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text-body);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+}
+
+/* Tabular numerals utility — financial amounts, tables, tickers */
+.tnum {
+  font-feature-settings: var(--nums-tabular);
+  font-variant-numeric: tabular-nums;
+}

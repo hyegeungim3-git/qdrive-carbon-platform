@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QDrive — 탄소중립 관제 대시보드</title>
+<meta name="description" content="대구 시내버스 412대의 OBD·DTG 데이터로 안전운전 → 연료 절감 → 탄소 감축을 관리하는 관제 대시보드 프로토타입">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/base.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/styles.css">
+  <script src="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--surface);-webkit-font-smoothing:antialiased;}
+    a{color:var(--link);text-decoration:none;}
+    a:hover{color:var(--primary);}
+    ::-webkit-scrollbar{width:10px;height:10px;}
+    ::-webkit-scrollbar-thumb{background:var(--grey-300);border-radius:8px;border:3px solid var(--surface);}
+    ::-webkit-scrollbar-track{background:transparent;}
+    @keyframes ecoPulse{0%{transform:scale(1);opacity:.9;}70%{transform:scale(2.4);opacity:0;}100%{opacity:0;}}
+    @keyframes ecoFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+    @keyframes livePulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+    .eco-page{animation:ecoFade .32s var(--ease-standard,ease);}
+  </style>
+</helmet>
+
+<div style="display:flex;height:100vh;height:100dvh;width:100%;overflow:hidden;color:var(--text-strong);">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside style="width:248px;flex:none;height:100%;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;">
+    <div style="padding:22px 20px 18px;display:flex;align-items:center;gap:10px;">
+      <div style="width:34px;height:34px;border-radius:10px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">QDrive</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-secondary);">OBD·DTG 기반 탄소중립 운영</div>
+      </div>
+    </div>
+
+    <div style="padding:6px 12px;flex:1;overflow-y:auto;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-placeholder);padding:12px 12px 6px;letter-spacing:0.4px;">DASHBOARD</div>
+
+      <button onClick="{{ go1 }}" style="{{ nav1 }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        통합 운영
+      </button>
+      <button onClick="{{ go2 }}" style="{{ nav2 }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+        탄소·연료
+      </button>
+      <button onClick="{{ go3 }}" style="{{ nav3 }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        안전운행
+      </button>
+
+      <div style="font-size:11px;font-weight:700;color:var(--text-placeholder);padding:18px 12px 6px;letter-spacing:0.4px;">운영관리</div>
+      <button onClick="{{ goV }}" style="{{ navV }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+        차량 관리
+      </button>
+      <button onClick="{{ goD }}" style="{{ navD }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        운전자 관리
+      </button>
+      <button onClick="{{ goR }}" style="{{ navR }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+        노선 관리
+      </button>
+      <div style="font-size:11px;font-weight:700;color:var(--text-placeholder);padding:18px 12px 6px;letter-spacing:0.4px;">플래닝 · 보고</div>
+      <button onClick="{{ goP }}" style="{{ navP }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="M12 22v-2"/><path d="m17 20.66-1-1.73"/><path d="M11 10.27 7 3.34"/><path d="m20.66 17-1.73-1"/><path d="m3.34 7 1.73 1"/><path d="M14 12h8"/><path d="M2 12h2"/></svg>
+        AI Planning
+      </button>
+      <button onClick="{{ goT }}" style="{{ navT }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+        Reports
+      </button>
+      <div style="font-size:11px;font-weight:700;color:var(--text-placeholder);padding:18px 12px 6px;letter-spacing:0.4px;">다른 화면</div>
+      <a href="QDrive 기사앱.dc.html" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text-default);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+        기사앱<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:2px 7px;border-radius:9px;">태블릿</span>
+      </a>
+      <a href="시민 탄소 대시보드.dc.html" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text-default);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        시민 대시보드<span style="margin-left:auto;font-size:10px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:2px 7px;border-radius:9px;">공개</span>
+      </a>
+    </div>
+
+    <div style="padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--grey-100);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--text-body);flex:none;">관</div>
+      <div style="min-width:0;">
+        <div style="font-size:13px;font-weight:700;">대구 통합관제센터</div>
+        <div style="font-size:11px;color:var(--text-secondary);">admin@qdrive.ai</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div style="flex:1;min-width:0;height:100%;display:flex;flex-direction:column;">
+
+    <!-- topbar -->
+    <header style="flex:none;height:60px;background:rgba(255,255,255,0.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:16px;position:sticky;top:0;z-index:10;">
+      <div style="min-width:0;">
+        <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">{{ pageTitle }}</div>
+        <div style="font-size:11.5px;color:var(--text-secondary);font-weight:500;">{{ pageSub }}</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <div style="display:inline-flex;background:var(--grey-100);border-radius:10px;padding:4px;gap:2px;">
+          <sc-for list="{{ periodChips }}" as="p" hint-placeholder-count="3">
+            <button onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text-body);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+          2026.07
+        </div>
+        <div style="position:relative;">
+          <button onClick="{{ toggleNotif }}" style="width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;color:var(--text-body);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+            <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}">
+              <span style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--red-500);border:1.5px solid #fff;"></span>
+            </sc-if>
+          </button>
+          <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:46px;right:0;width:344px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.14);z-index:60;overflow:hidden;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--divider);">
+                <span style="font-size:14px;font-weight:700;">알림 <span style="color:var(--primary);">{{ notifCount }}</span></span>
+                <button onClick="{{ clearNotif }}" style="border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:700;color:var(--text-secondary);cursor:pointer;padding:4px 6px;border-radius:6px;">모두 읽음</button>
+              </div>
+              <div style="display:flex;flex-direction:column;padding:6px 0;">
+                <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;">
+                    <div style="{{ a.dotStyle }}"></div>
+                    <div style="min-width:0;flex:1;">
+                      <div style="font-size:13px;font-weight:700;">{{ a.title }}</div>
+                      <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;">{{ a.vehicle }} · {{ a.time }}</div>
+                    </div>
+                    <span style="{{ a.badgeStyle }}">{{ a.level }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </header>
+
+    <!-- scroll area -->
+    <main style="flex:1;min-height:0;overflow-y:auto;padding:14px 16px 24px;">
+
+      <!-- ===================== DASH 1 : 통합 운영 ===================== -->
+      <sc-if value="{{ isDash1 }}" hint-placeholder-val="{{ true }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- carbon ribbon -->
+        <div style="background:var(--grey-900);border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:26px;color:#fff;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03b26c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+            <span style="font-size:14px;font-weight:700;">오늘의 탄소·연료 성과</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:6px;"><span style="font-size:13px;font-weight:600;color:#b0b8c1;">CO₂ 절감</span><span style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:#03b26c;">2.1t</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;"><span style="font-size:13px;font-weight:600;color:#b0b8c1;">연료 절감</span><span style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;">784L</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;"><span style="font-size:13px;font-weight:600;color:#b0b8c1;">Eco Driving 실천율</span><span style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;">78%</span></div>
+          <div style="display:flex;align-items:baseline;gap:6px;"><span style="font-size:13px;font-weight:600;color:#b0b8c1;">OBD·DTG 수집</span><span style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;">356대 정상</span></div>
+          <button onClick="{{ go2 }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:none;border-radius:9px;background:rgba(255,255,255,0.12);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">
+            탄소·연료 대시보드
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- KPI row -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">전체 차량</div>
+            <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;">412<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">5개 운수회사</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">운행중</div>
+            <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">356<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ 정상 운행</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">운휴</div>
+            <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;">56<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">정비 12 · 대기 44</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">가동률</div>
+            <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;">86.4<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">%</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ +1.2%p 전월</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">이상 알림</div>
+            <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--red-500);">4<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">건</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--red-500);">위험 1 · 주의 2 · 정보 1</div>
+          </div>
+        </div>
+
+        <!-- AI strip : 운행 -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Insight</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">세진 2044호 연비가 평소보다 23% 낮아요 — 인젝터 이상 패턴과 87% 일치해요.</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Coach</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">운행 전 점검을 권장해요. 사전 정비 시 돌발 결행을 월 3건 줄일 수 있어요.</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(3,178,108,0.1);color:var(--success);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--success);">AI Forecast</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">방치 시 30일 내 고장 확률 87% — 이번 주 정비 시 정상 운행이 예상돼요.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- map + fleet donut -->
+        <div style="display:grid;grid-template-columns:1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;box-shadow:var(--shadow-standard);overflow:hidden;position:relative;min-height:400px;">
+            <div id="map-live" style="position:absolute;inset:0;z-index:0;background:#eef1f5;"></div>
+
+            <!-- overlay: header -->
+            <div style="position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:10px;z-index:1000;">
+              <div style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:10px;padding:9px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;">
+                실시간 차량 위치
+                <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--success);"><span style="width:7px;height:7px;border-radius:50%;background:var(--success);animation:livePulse 1.6s infinite;"></span>LIVE</span>
+              </div>
+            </div>
+            <!-- overlay: legend -->
+            <div style="position:absolute;bottom:14px;left:14px;display:flex;gap:8px;z-index:1000;">
+              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);"></span>운행 356</span>
+              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--success);"></span>친환경 118</span>
+              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--red-500);"></span>이상 1</span>
+              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--grey-400);"></span>운휴 56</span>
+              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:7px;"><span style="width:34px;height:8px;border-radius:4px;background:linear-gradient(90deg,#3182f6,#fe9800,#f04452);"></span>급가속·급감속 히트맵</span>
+            </div>
+            <!-- overlay: zoom -->
+            <div style="position:absolute;top:14px;right:14px;display:flex;flex-direction:column;background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.12);overflow:hidden;z-index:1000;">
+              <button onClick="{{ mapZoomIn }}" style="width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:17px;font-weight:600;color:var(--text-body);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:center;">+</button>
+              <button onClick="{{ mapZoomOut }}" style="width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:17px;font-weight:600;color:var(--text-body);display:flex;align-items:center;justify-content:center;">−</button>
+            </div>
+            <!-- overlay: attribution -->
+            <div style="position:absolute;bottom:6px;right:10px;font-size:10px;font-weight:500;color:#6b7684;z-index:1000;background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">© OpenStreetMap · CARTO · QDrive</div>
+          </div>
+
+        </div>
+
+        <!-- 계통별 + 노선별 -->
+        <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:14px;">계통별 현황</div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <sc-for list="{{ systems }}" as="s" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px;">
+                    <span>{{ s.name }}</span>
+                    <span style="color:var(--text-secondary);font-variant-numeric:tabular-nums;">{{ s.label }}</span>
+                  </div>
+                  <div style="height:8px;border-radius:9999px;background:var(--grey-100);overflow:hidden;">
+                    <div style="{{ s.barStyle }}"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:16px;font-weight:700;">노선별 현황</div>
+              <div style="display:flex;gap:6px;">
+                <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+                  <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">노선</th>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">운수회사</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">배차/운행</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">정시율</th>
+                <th style="text-align:center;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">상태</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ routes }}" as="r" hint-placeholder-count="6">
+                  <tr>
+                    <td style="padding:11px 10px;border-bottom:1px solid var(--divider);"><div style="font-size:13px;font-weight:700;">{{ r.no }}</div><div style="font-size:11px;color:var(--text-secondary);margin-top:1px;">{{ r.stop }}</div></td>
+                    <td style="padding:11px 10px;font-size:13px;color:var(--text-body);border-bottom:1px solid var(--divider);">{{ r.co }}</td>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ r.dispatch }}</td>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ r.rate }}</td>
+                    <td style="padding:11px 10px;text-align:center;border-bottom:1px solid var(--divider);"><span style="{{ r.badgeStyle }}">{{ r.status }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 이상 알림 + AI 추천 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="font-size:16px;font-weight:700;">차량 이상 알림</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">OBD·DTG</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;border:1px solid var(--border);border-radius:12px;">
+                  <div style="{{ a.dotStyle }}"></div>
+                  <div style="min-width:0;flex:1;">
+                    <div style="font-size:14px;font-weight:700;">{{ a.title }}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">{{ a.vehicle }} · {{ a.time }}</div>
+                  </div>
+                  <span style="{{ a.badgeStyle }}">{{ a.level }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="font-size:16px;font-weight:700;">AI 추천</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">OBD·DTG 분석 · 신뢰도 94%</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ recs }}" as="r" hint-placeholder-count="4">
+                <div style="padding:13px 16px;border:1px solid var(--border);border-radius:12px;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                    <span style="{{ r.tagStyle }}">{{ r.tag }}</span>
+                    <span style="font-size:14px;font-weight:700;">{{ r.title }}</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--text-body);line-height:1.55;">{{ r.desc }}</div>
+                  <sc-if value="{{ r.basis }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:12px;color:var(--text-secondary);line-height:1.55;margin-top:4px;">{{ r.basis }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </sc-if>
+
+      <!-- ===================== DASH 2 : 탄소·연료 ===================== -->
+      <sc-if value="{{ isDash2 }}" hint-placeholder-val="{{ true }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- 핵심 성과 흐름 -->
+        <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:17px;font-weight:700;">{{ flowTitle }}</span>
+              <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:4px 10px;border-radius:9999px;">OBD·DTG 실측</span>
+            </div>
+            <span style="font-size:13px;font-weight:600;color:var(--text-secondary);">{{ flowAsOf }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1.2fr;gap:10px;align-items:stretch;">
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">DTG 주행거리</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;">{{ flowKm }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">km</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">{{ flowKmSub }}</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="align-self:center;"><path d="m9 18 6-6-6-6"/></svg>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">연비 개선</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--primary);">{{ flowEff }}</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">{{ flowEffSub }}</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="align-self:center;"><path d="m9 18 6-6-6-6"/></svg>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">연료 절감</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;">{{ flowFuel }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">L</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">{{ flowFuelSub }}</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="align-self:center;"><path d="m9 18 6-6-6-6"/></svg>
+            <div style="background:rgba(3,178,108,0.08);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">CO₂ 절감 · 탄소저감률</div>
+              <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px;">
+                <span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">{{ flowCo2 }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">tCO₂</span></span>
+                <span style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">{{ flowCo2Pct }}</span>
+              </div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">경유 2.68 kgCO₂/L 환산</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--divider);margin-top:14px;padding-top:12px;font-size:12px;font-weight:600;color:var(--text-secondary);">
+            <span>배출 원단위 <b style="color:var(--text-strong);">1.07 → 1.02 kgCO₂/km</b></span>
+            <span>Eco Driving 실천율 <b style="color:var(--text-strong);">78%</b></span>
+            <span>친환경 차량 운행 비율 <b style="color:var(--text-strong);">34%</b></span>
+            <span>연간 누적 <b style="color:var(--success);">393.7 tCO₂</b></span>
+          </div>
+        </div>
+
+        <!-- 연비·전비 근거 -->
+        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-size:15px;font-weight:700;">연비·전비 개선 — 도입 전 → 후</div>
+            <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">OBD 연료분사량 × DTG 주행거리 교차 검증</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+            <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">경유 (272대)</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
+                <span style="font-size:14px;font-weight:600;color:var(--text-placeholder);font-variant-numeric:tabular-nums;">2.42</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                <span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">2.53</span>
+                <span style="font-size:12px;font-weight:600;color:var(--text-body);">km/L</span>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--success);margin-top:5px;">▲ +4.5%</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">CNG (72대)</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
+                <span style="font-size:14px;font-weight:600;color:var(--text-placeholder);font-variant-numeric:tabular-nums;">1.98</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                <span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">2.06</span>
+                <span style="font-size:12px;font-weight:600;color:var(--text-body);">km/㎥</span>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--success);margin-top:5px;">▲ +4.0%</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">전기 · 전비 (68대)</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
+                <span style="font-size:14px;font-weight:600;color:var(--text-placeholder);font-variant-numeric:tabular-nums;">1.05</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                <span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">1.12</span>
+                <span style="font-size:12px;font-weight:600;color:var(--text-body);">km/kWh</span>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--success);margin-top:5px;">▲ +6.7%</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">공회전 시간 (대당 일)</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
+                <span style="font-size:14px;font-weight:600;color:var(--text-placeholder);font-variant-numeric:tabular-nums;">42분</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                <span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">34분</span>
+              </div>
+              <div style="font-size:12px;font-weight:700;color:var(--success);margin-top:5px;">▼ -19%</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <div style="font-size:16px;font-weight:700;">{{ trendTitle }}</div>
+              <div style="display:flex;gap:14px;font-size:12px;font-weight:600;color:var(--text-body);">
+                <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--primary);"></span>연료 절감({{ trendFuelUnit }})</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:10px;height:3px;border-radius:2px;background:var(--success);"></span>CO₂ 절감(t)</span>
+              </div>
+            </div>
+            <div style="position:relative;height:260px;"><canvas id="c-trend"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:16px;font-weight:700;">CO₂ 절감 예측</div>
+              <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">AI · 향후 6개월</span>
+            </div>
+            <div style="position:relative;flex:1;min-height:220px;"><canvas id="c-forecast"></canvas></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:16px;">계통별 CO₂ 절감 비교</div>
+            <div style="position:relative;height:230px;"><canvas id="c-system"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:16px;">노선별 절감 TOP 5</div>
+            <div style="position:relative;height:230px;"><canvas id="c-route"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:16px;">유종별 CO₂ 배출 구성</div>
+            <div style="position:relative;height:190px;display:flex;align-items:center;justify-content:center;"><canvas id="c-fueltype"></canvas></div>
+            <div style="display:flex;justify-content:space-around;margin-top:12px;font-size:12px;font-weight:600;">
+              <span style="color:var(--text-secondary);">● 경유 78%</span>
+              <span style="color:var(--success);">● CNG 19%</span>
+              <span style="color:var(--primary);">● 전기 3%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 안전운전 ↔ 연비 상관 + 운수회사별 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:16px;font-weight:700;">안전운전 점수 ↔ 연비 상관</div>
+              <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">차량 412대 · 상관계수 r = 0.81</span>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">안전점수 10점 상승 시 연비 +0.11 km/L — 안전운전이 곧 절감이라는 근거예요.</div>
+            <div style="position:relative;height:230px;"><canvas id="c-corr"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:16px;font-weight:700;">운수회사별 절감 성과 (7월)</div>
+              <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">베이스라인 대비 연료 절감률</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ coRanks }}" as="c" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="{{ c.rankStyle }}">{{ c.rank }}</div>
+                  <div style="width:110px;flex:none;">
+                    <div style="font-size:13px;font-weight:700;">{{ c.name }}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);">{{ c.buses }}</div>
+                  </div>
+                  <div style="flex:1;height:10px;border-radius:9999px;background:var(--grey-100);overflow:hidden;">
+                    <div style="{{ c.barStyle }}"></div>
+                  </div>
+                  <div style="width:110px;flex:none;text-align:right;">
+                    <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">{{ c.pct }}</span>
+                    <span style="font-size:11px;font-weight:600;color:var(--text-secondary);margin-left:4px;">{{ c.co2 }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border-top:1px solid var(--divider);margin-top:14px;padding-top:11px;font-size:12px;font-weight:600;color:var(--text-secondary);">1위 세운버스는 Eco Driving 실천율 91%로 절감률이 가장 높아요.</div>
+          </div>
+        </div>
+
+        <!-- AI strip : 탄소 -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Insight</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">이번 달 절감의 62%는 공회전 감소(42→34분)에서 나왔어요.</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Coach</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">지선 356 정속 구간 코칭 시 월 1.9 tCO₂를 더 줄일 수 있어요.</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(3,178,108,0.1);color:var(--success);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--success);">AI Forecast</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">다음 달 CO₂ 배출은 이번 달보다 1.6% 줄어들 것으로 예상돼요.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:14px 18px;background:var(--grey-50);border-radius:12px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span style="font-size:12px;font-weight:500;color:var(--text-secondary);line-height:1.6;">산정 기준 — 절감량은 도입 전 12개월 노선별 연비 베이스라인 대비 실측 개선분. 연료량은 OBD 연료분사량, 주행거리는 DTG 기록으로 교차 검증. 배출계수: 경유 2.68 kgCO₂/L · CNG 2.22 kgCO₂/㎥ · 전력 0.4594 kgCO₂/kWh (환경부 고시). 안전운전 효과는 실증 범위 3~7% 내(당월 4.3%)로 관리.</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== DASH 3 : 안전운행 ===================== -->
+      <sc-if value="{{ isDash3 }}" hint-placeholder-val="{{ true }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:300px 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
+            <div style="font-size:16px;font-weight:700;">평균 운전점수</div>
+            <div style="position:relative;flex:1;min-height:170px;display:flex;align-items:flex-end;justify-content:center;">
+              <canvas id="c-gauge"></canvas>
+              <div style="position:absolute;bottom:14px;text-align:center;pointer-events:none;">
+                <div style="font-size:34px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">82.4</div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">전월 대비 +2.1점</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--text-secondary);border-top:1px solid var(--divider);padding-top:12px;margin-top:6px;">
+              <span>안전등급 <b style="color:var(--success);">우수</b></span>
+              <span>상위 <b style="color:var(--text-strong);">28%</b></span>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="font-size:16px;font-weight:700;">위험 운전 이벤트</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">DTG</span></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
+              <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">급가속</div>
+                <div style="margin-top:6px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;">342<span style="font-size:12px;color:var(--text-body);margin-left:2px;">건</span></div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">급감속</div>
+                <div style="margin-top:6px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;">289<span style="font-size:12px;color:var(--text-body);margin-left:2px;">건</span></div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">과속</div>
+                <div style="margin-top:6px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--red-500);">47<span style="font-size:12px;color:var(--text-body);margin-left:2px;">건</span></div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+                <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">공회전</div>
+                <div style="margin-top:6px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;">312<span style="font-size:12px;color:var(--text-body);margin-left:2px;">건</span></div>
+              </div>
+            </div>
+            <div style="position:relative;height:150px;"><canvas id="c-events"></canvas></div>
+          </div>
+        </div>
+
+        <!-- AI strip : 안전 -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Insight</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">위험 이벤트의 43%가 하위 12명에게 집중 — 급가속이 주 원인이에요.</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Coach</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">한지훈·오세영 기사에게 출발 가속 코칭을 배정하면 점수 +4점이 기대돼요.</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(240,68,82,0.08);color:var(--red-500);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+            <div style="min-width:0;">
+              <div style="font-size:12px;font-weight:700;color:var(--red-500);">AI Forecast</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">반월당 네거리 우천 시 사고 위험이 2.4배 — 금요일 비 예보에 주의하세요.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:14px;">기사 랭킹</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <sc-for list="{{ drivers }}" as="d" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;">
+                  <div style="{{ d.rankStyle }}">{{ d.rank }}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:14px;font-weight:700;">{{ d.name }}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);">{{ d.co }}</div>
+                  </div>
+                  <div style="font-size:16px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">{{ d.score }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:16px;font-weight:700;">위험 구간</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">AI 탐지</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ zones }}" as="z" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--grey-50);border-radius:10px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f04452" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:700;">{{ z.loc }}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);">{{ z.type }} · {{ z.count }}</div>
+                  </div>
+                  <span style="{{ z.badgeStyle }}">{{ z.level }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:14px;">차량별 안전 점수</div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">차량</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">급가속</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">급감속</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">과속</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">점수</th>
+                <th style="text-align:center;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">위험도</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ vehicles }}" as="v" hint-placeholder-count="6">
+                  <tr>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:700;border-bottom:1px solid var(--divider);">{{ v.name }}</td>
+                    <td style="padding:11px 10px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ v.accel }}</td>
+                    <td style="padding:11px 10px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ v.decel }}</td>
+                    <td style="padding:11px 10px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ v.speed }}</td>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ v.score }}</td>
+                    <td style="padding:11px 10px;text-align:center;border-bottom:1px solid var(--divider);"><span style="{{ v.badgeStyle }}">{{ v.grade }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+
+      <!-- ===================== PAGE V : 차량 관리 ===================== -->
+      <sc-if value="{{ isPageV }}" hint-placeholder-val="{{ false }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">등록 차량</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">412<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">이번 달 신규 6대</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">정비중</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange-500);">12<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">금일 출고 예정 4대</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">예지정비 알림</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--red-500);">5<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">건</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--red-500);">고장 예측 30일 이내</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">평균 차령</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">5.8<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">년</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">교체 권장 21대</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;">
+              <div style="font-size:16px;font-weight:700;">차량 조회</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;color:var(--text-placeholder);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input onChange="{{ onVehicleSearch }}" value="{{ vehicleQuery }}" placeholder="차량번호 검색" style="border:none;outline:none;font-family:inherit;font-size:13px;font-weight:600;width:120px;color:var(--text-strong);background:transparent;">
+                </div>
+                <button onClick="{{ onRegisterVehicle }}" style="height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg>
+                  차량 등록
+                </button>
+              </div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">차량번호</th>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">운수회사</th>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">유종</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">누적주행</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">최근 정비</th>
+                <th style="text-align:center;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">상태</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ mgVehicles }}" as="v" hint-placeholder-count="7">
+                  <tr>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:700;border-bottom:1px solid var(--divider);">{{ v.no }}</td>
+                    <td style="padding:11px 10px;font-size:13px;color:var(--text-body);border-bottom:1px solid var(--divider);">{{ v.co }}</td>
+                    <td style="padding:11px 10px;font-size:13px;color:var(--text-body);border-bottom:1px solid var(--divider);">{{ v.fuel }}</td>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ v.km }}</td>
+                    <td style="padding:11px 10px;font-size:13px;color:var(--text-body);text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ v.lastFix }}</td>
+                    <td style="padding:11px 10px;text-align:center;border-bottom:1px solid var(--divider);"><span style="{{ v.badgeStyle }}">{{ v.status }}</span></td>
+                  </tr>
+                </sc-for>
+                <sc-if value="{{ mgVehiclesEmpty }}" hint-placeholder-val="{{ false }}">
+                  <tr>
+                    <td colspan="6" style="padding:32px 10px;text-align:center;font-size:13px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--divider);">'{{ vehicleQuery }}' 검색 결과가 없어요 — 차량번호 또는 운수회사명으로 검색해 보세요</td>
+                  </tr>
+                </sc-if>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px;">차량 상태</div>
+              <div style="position:relative;height:170px;display:flex;align-items:center;justify-content:center;">
+                <canvas id="c-vstatus"></canvas>
+              </div>
+              <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:12px;font-weight:600;">
+                <span style="color:var(--primary);">● 운행 356</span>
+                <span style="color:var(--orange-500);">● 정비 12</span>
+                <span style="color:var(--text-secondary);">● 대기 44</span>
+              </div>
+            </div>
+            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <div style="font-size:16px;font-weight:700;">AI 예지정비</div>
+                <span style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">고장 예측</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <sc-for list="{{ predicts }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--grey-50);border-radius:10px;">
+                    <div style="{{ p.dotStyle }}"></div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:13px;font-weight:700;">{{ p.no }} · {{ p.part }}</div>
+                      <div style="font-size:12px;color:var(--text-secondary);margin-top:1px;">{{ p.eta }}</div>
+                    </div>
+                    <span style="{{ p.badgeStyle }}">{{ p.prob }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="font-size:16px;font-weight:700;margin-bottom:14px;">최근 정비 이력</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            <sc-for list="{{ fixLogs }}" as="f" hint-placeholder-count="3">
+              <div style="padding:16px;border:1px solid var(--border);border-radius:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <span style="font-size:14px;font-weight:700;">{{ f.no }}</span>
+                  <span style="font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;">{{ f.date }}</span>
+                </div>
+                <div style="font-size:13px;color:var(--text-body);margin-top:6px;">{{ f.work }}</div>
+                <div style="font-size:13px;font-weight:700;margin-top:8px;font-variant-numeric:tabular-nums;">{{ f.cost }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PAGE D : 운전자 관리 ===================== -->
+      <sc-if value="{{ isPageD }}" hint-placeholder-val="{{ false }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">등록 기사</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">486<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">명</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">5개 운수회사</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">평균 운전점수</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">82.4<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">점</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ +2.1점 전월대비</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">교육 대상</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange-500);">23<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">명</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">70점 미만 · AI 선별</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">우수 기사</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">64<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">명</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">90점 이상 · 인센티브 대상</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:16px;font-weight:700;">기사 관리</div>
+              <div style="display:flex;gap:6px;">
+                <sc-for list="{{ driverChips }}" as="c" hint-placeholder-count="3">
+                  <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">기사</th>
+                <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">담당 노선</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">운전점수</th>
+                <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">전월 대비</th>
+                <th style="text-align:center;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">구분</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ mgDrivers }}" as="d" hint-placeholder-count="7">
+                  <tr>
+                    <td style="padding:11px 10px;border-bottom:1px solid var(--divider);"><div style="font-size:13px;font-weight:700;">{{ d.name }}</div><div style="font-size:11px;color:var(--text-secondary);margin-top:1px;">{{ d.co }}</div></td>
+                    <td style="padding:11px 10px;font-size:13px;color:var(--text-body);border-bottom:1px solid var(--divider);">{{ d.route }}</td>
+                    <td style="padding:11px 10px;font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ d.score }}</td>
+                    <td style="{{ d.deltaStyle }}">{{ d.delta }}</td>
+                    <td style="padding:11px 10px;text-align:center;border-bottom:1px solid var(--divider);"><span style="{{ d.badgeStyle }}">{{ d.grade }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <div style="font-size:16px;font-weight:700;">교육 대상 · AI 선별</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <sc-for list="{{ eduTargets }}" as="e" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--grey-50);border-radius:10px;">
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-size:13px;font-weight:700;">{{ e.name }} · {{ e.co }}</div>
+                      <div style="font-size:12px;color:var(--text-secondary);margin-top:1px;">{{ e.issue }}</div>
+                    </div>
+                    <span style="{{ e.badgeStyle }}">{{ e.score }}점</span>
+                  </div>
+                </sc-for>
+              </div>
+              <button onClick="{{ onAssignEdu }}" style="width:100%;height:40px;margin-top:14px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">교육 과정 배정하기</button>
+            </div>
+            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);flex:1;">
+              <div style="font-size:16px;font-weight:700;margin-bottom:12px;">성과 관리</div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:13px;font-weight:600;color:var(--text-body);">에코 드라이빙 달성률</span>
+                  <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;">78%</span>
+                </div>
+                <div style="height:8px;border-radius:9999px;background:var(--grey-100);overflow:hidden;"><div style="width:78%;height:100%;border-radius:9999px;background:var(--success);"></div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:13px;font-weight:600;color:var(--text-body);">인센티브 지급 (7월)</span>
+                  <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;">12,800,000원</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:13px;font-weight:600;color:var(--text-body);">교육 이수율</span>
+                  <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;">91%</span>
+                </div>
+                <div style="height:8px;border-radius:9999px;background:var(--grey-100);overflow:hidden;"><div style="width:91%;height:100%;border-radius:9999px;background:var(--primary);"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PAGE R : 노선 관리 ===================== -->
+      <sc-if value="{{ isPageR }}" hint-placeholder-val="{{ false }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">운영 노선</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">128<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">개</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">급행 12 · 간선 58 · 지선 46 · 순환 12</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">일 평균 운행</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">4,820<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">회</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">일 주행 68,400km</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">평균 정시율</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">87.2<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">%</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ +0.8%p 전월대비</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">저효율 노선</div>
+            <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange-500);">9<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">개</span></div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">AI 개편 검토 권장</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:16px;">노선 효율 (연료 L/100km)</div>
+            <div style="position:relative;height:240px;"><canvas id="c-reff"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:16px;font-weight:700;margin-bottom:16px;">계통별 수송 인원 (월)</div>
+            <div style="position:relative;height:240px;"><canvas id="c-rpax"></canvas></div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="font-size:16px;font-weight:700;margin-bottom:14px;">노선별 통계</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">노선</th>
+              <th style="text-align:left;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">구간</th>
+              <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">일 운행</th>
+              <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">일 수송</th>
+              <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">연비 효율</th>
+              <th style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">CO₂/km</th>
+              <th style="text-align:center;padding:8px 10px;font-size:12px;font-weight:600;color:var(--text-secondary);border-bottom:1px solid var(--border);">효율 등급</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ routeStats }}" as="r" hint-placeholder-count="6">
+                <tr>
+                  <td style="padding:11px 10px;font-size:13px;font-weight:700;border-bottom:1px solid var(--divider);">{{ r.no }}</td>
+                  <td style="padding:11px 10px;font-size:13px;color:var(--text-body);border-bottom:1px solid var(--divider);">{{ r.seg }}</td>
+                  <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ r.trips }}</td>
+                  <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ r.pax }}</td>
+                  <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ r.eff }}</td>
+                  <td style="padding:11px 10px;font-size:13px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--divider);">{{ r.co2 }}</td>
+                  <td style="padding:11px 10px;text-align:center;border-bottom:1px solid var(--divider);"><span style="{{ r.badgeStyle }}">{{ r.grade }}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PAGE P : AI Planning ===================== -->
+      <sc-if value="{{ isPageP }}" hint-placeholder-val="{{ false }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- 전환 시뮬레이터 -->
+        <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:12px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:17px;font-weight:700;">전기버스 전환 시뮬레이터</span>
+              <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:4px 10px;border-radius:9999px;">What-if · OBD 실측 기반</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <sc-for list="{{ planScenarios }}" as="s" hint-placeholder-count="3">
+                <button onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-bottom:16px;">AI가 차령·연비 하위·일 주행거리 순으로 전환 효과가 큰 노후 경유차부터 선정해요 — 대수를 조절해 보세요.</div>
+          <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1fr;gap:12px;align-items:stretch;">
+            <div style="background:var(--grey-50);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:center;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">전환 대수 (노후 경유차)</span>
+                <span style="font-size:24px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">{{ planN }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:1px;">대</span></span>
+              </div>
+              <input type="range" min="1" max="50" value="{{ planN }}" onChange="{{ onPlanN }}" style="width:100%;margin-top:14px;accent-color:var(--primary);cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--text-placeholder);margin-top:5px;"><span>1대</span><span>대상 후보 50대</span></div>
+            </div>
+            <div style="background:rgba(3,178,108,0.08);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">연 CO₂ 감축</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--success);">{{ planCo2 }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">tCO₂</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">시 감축목표의 {{ planGoalPct }}</div>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">연 연료비 절감</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;">{{ planFuelWon }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">억원</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">경유 → 심야 전력 대체</div>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">실투자 (보조금 차감)</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;">{{ planInvest }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">억원</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">대당 보조금 2.8억 반영</div>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">투자 회수</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--primary);">{{ planRoi }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">년</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">연료비 절감 기준</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 감축 곡선 + AI 선정 대상 -->
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:16px;font-weight:700;">전환 규모별 연 감축량 곡선</div>
+              <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">● 현재 계획 지점</span>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">효과 큰 차량부터 전환하므로 대수가 늘수록 대당 감축 효과는 점차 줄어요 — 한계 효과를 보고 규모를 정하세요.</div>
+            <div style="position:relative;height:250px;"><canvas id="c-plan"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div style="font-size:16px;font-weight:700;">AI 선정 전환 대상</div>
+              <span style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">효과순 TOP 5</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <sc-for list="{{ planTargets }}" as="t" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--grey-50);border-radius:10px;">
+                  <div style="{{ t.rankStyle }}">{{ t.rank }}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:700;">{{ t.no }}</div>
+                    <div style="font-size:11.5px;color:var(--text-secondary);margin-top:1px;">{{ t.detail }}</div>
+                  </div>
+                  <span style="font-size:13px;font-weight:700;color:var(--success);font-variant-numeric:tabular-nums;flex:none;">{{ t.co2 }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <!-- 충전 · 재원 · 크레딧 -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">충전 스케줄 최적화</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px;"><span style="color:var(--text-body);">심야 경부하(23~09시) 충전 비중</span><span style="font-variant-numeric:tabular-nums;">41% → <b style="color:var(--primary);">68%</b></span></div>
+            <div style="height:8px;border-radius:9999px;background:var(--grey-100);overflow:hidden;margin-bottom:12px;"><div style="width:68%;height:100%;border-radius:9999px;background:var(--primary);"></div></div>
+            <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);line-height:1.6;">kWh당 62원 절감 — 현 전기 68대 기준 <b style="color:var(--text-strong);">월 940만원</b>, 전환 확대 시 비례 증가해요.</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">보조금 · 재원</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;">
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-body);">대당 차량가 (대형 전기버스)</span><span style="font-variant-numeric:tabular-nums;">3.9억원</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-body);">국비 보조금</span><span style="font-variant-numeric:tabular-nums;color:var(--primary);">-1.6억원</span></div>
+              <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-body);">시비 보조금</span><span style="font-variant-numeric:tabular-nums;color:var(--primary);">-1.2억원</span></div>
+              <div style="display:flex;justify-content:space-between;border-top:1px solid var(--divider);padding-top:8px;"><span style="color:var(--text-strong);font-weight:700;">실부담 (대당)</span><span style="font-variant-numeric:tabular-nums;font-weight:700;">1.1억원</span></div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:10px;">2026년 시 배정 물량 잔여 <b style="color:var(--text-strong);">28대</b> — 신청 마감 9월.</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div style="font-size:15px;font-weight:700;">감축 실적의 수익화</div>
+              <span style="font-size:11px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:3px 8px;border-radius:9999px;">외부사업 KOC</span>
+            </div>
+            <div style="font-size:12.5px;font-weight:600;color:var(--text-body);line-height:1.65;">현재 계획({{ planN }}대) 감축량 {{ planCo2 }} tCO₂를 온실가스 외부사업으로 인증하면 크레딧 판매로 <b style="color:var(--success);">연 {{ planKoc }}</b> 수익이 예상돼요 (톤당 8,900원).</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:10px;">OBD·DTG 실측 데이터가 검증기관 제출용 증빙이 돼요 — Reports에서 명세 확인.</div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PAGE T : Reports ===================== -->
+      <sc-if value="{{ isPageT }}" hint-placeholder-val="{{ false }}">
+      <div class="eco-page" style="display:grid;grid-template-columns:1fr 1.5fr;gap:12px;align-items:start;">
+
+        <!-- 보고서 목록 -->
+        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <div style="font-size:16px;font-weight:700;">보고서</div>
+            <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">운영 데이터 자동 생성</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ reports }}" as="r" hint-placeholder-count="4">
+              <button onClick="{{ r.onClick }}" style="{{ r.style }}">
+                <div style="flex:1;min-width:0;text-align:left;">
+                  <div style="font-size:13.5px;font-weight:700;">{{ r.title }}</div>
+                  <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;">{{ r.period }}</div>
+                </div>
+                <span style="{{ r.badgeStyle }}">{{ r.status }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="border-top:1px solid var(--divider);margin-top:14px;padding-top:11px;font-size:12px;font-weight:600;color:var(--text-secondary);line-height:1.6;">매월 말 자동 생성 · OBD 연료분사량 × DTG 주행거리 교차 검증 수치만 사용해요.</div>
+        </div>
+
+        <!-- 미리보기 -->
+        <div style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+          <sc-if value="{{ repPending }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:60px 20px;text-align:center;">
+              <div style="font-size:15px;font-weight:700;color:var(--text-body);">아직 생성되지 않은 보고서예요</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:8px;">{{ repPeriod }} — 매월 말일에 자동 생성돼요.</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ repReady }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
+              <div>
+                <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">{{ repTitle }}</div>
+                <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:3px;">{{ repPeriod }} · 대구광역시 제출용 · QDrive 자동 생성</div>
+              </div>
+              <div style="display:flex;gap:8px;flex:none;">
+                <button onClick="{{ onExportPdf }}" style="height:36px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-body);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">PDF 내보내기</button>
+                <button onClick="{{ onSubmitGov }}" style="height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">지자체 제출</button>
+              </div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:12px;padding:6px 16px;margin-top:14px;">
+              <sc-for list="{{ repRows }}" as="row" hint-placeholder-count="5">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--divider);">
+                  <span style="font-size:13px;font-weight:600;color:var(--text-body);">{{ row.k }}</span>
+                  <span style="font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;">{{ row.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;margin-top:12px;">
+              <div style="font-size:12px;font-weight:700;color:var(--blue-600);margin-bottom:5px;">AI 요약</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-body);line-height:1.65;">{{ repSummary }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dash: "1", sys: "전체", drvFilter: "전체", vq: "", period: "월간", notif: false, unread: true, planN: 12, repSel: 0 };
+
+  // 전환 시뮬레이터 — AI가 효과 큰 차량부터 선정하므로 대당 감축량은 한계 체감 (k번째 차량 = 36.5 - 0.3k tCO₂/년)
+  // 대당 실투자 1.1억(차량가 3.9억 - 보조금 2.8억), 연료비 절감은 감축량 비례 (35.7tCO₂ ↔ 4,100만원)
+  planCalc(n) {
+    const co2 = 36.5 * n - 0.15 * n * (n + 1);
+    const fuelEok = co2 * 1148000 / 1e8;
+    const investEok = n * 1.1;
+    return { co2: Math.round(co2), fuelEok, investEok, roi: investEok / fuelEok };
+  }
+
+  navStyle(n) {
+    const active = this.state.dash === n;
+    return {
+      display: "flex", alignItems: "center", gap: 10, width: "100%",
+      padding: "10px 12px", marginBottom: 2, border: "none", borderRadius: 10,
+      cursor: "pointer", fontFamily: "inherit", fontSize: 14, fontWeight: active ? 700 : 600,
+      textAlign: "left", transition: "background .15s, color .15s",
+      background: active ? "var(--primary-weak)" : "transparent",
+      color: active ? "var(--primary)" : "var(--text-default)",
+    };
+  }
+
+  // 필터 chip 공통 스타일 (노선/기사 필터에서 공용)
+  chipStyle(active) {
+    return { appearance: "none", border: active ? "1px solid var(--primary)" : "1px solid var(--border)",
+      background: active ? "var(--primary-weak)" : "#fff", color: active ? "var(--primary)" : "var(--text-body)",
+      fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 9999, cursor: "pointer" };
+  }
+
+  // 기간(일간/월간/연간)별 탄소·연료 성과 데이터 — 절감량·CO₂는 경유 2.68 kgCO₂/L 환산 기준으로 상호 정합
+  periodData() {
+    const P = {
+      "일간": { title: "7월 11일, 안전운전이 만든 절감", asOf: "금일 운행분 · 412대",
+        km: "129,200", kmSub: "금일 운행 누적", eff: "+4.3%", effSub: "2.42 → 2.52 km/L (경유)",
+        fuel: "784", fuelSub: "베이스라인 대비 -4.1%", co2: "2.1", co2Pct: "-4.3%",
+        trendTitle: "일별 추이 — 연료 절감 · CO₂ 절감", fuelUnit: "L",
+        trendLabels: ["7/5", "7/6", "7/7", "7/8", "7/9", "7/10", "7/11"],
+        trendFuel: [740, 790, 720, 830, 810, 620, 784], trendCo2: [1.98, 2.12, 1.93, 2.22, 2.17, 1.66, 2.1] },
+      "월간": { title: "7월, 안전운전이 만든 절감", asOf: "7월 11일 기준 · 412대",
+        km: "2,843,000", kmSub: "운행 22일 누적", eff: "+4.5%", effSub: "2.42 → 2.53 km/L (경유)",
+        fuel: "27,100", fuelSub: "베이스라인 대비 -4.3%", co2: "72.6", co2Pct: "-4.7%",
+        trendTitle: "월별 추이 — 연료 절감 · CO₂ 절감", fuelUnit: "천L",
+        trendLabels: ["2월", "3월", "4월", "5월", "6월", "7월"],
+        trendFuel: [21.4, 22.8, 24.1, 25.2, 26.3, 27.1], trendCo2: [57.4, 61.1, 64.6, 67.5, 70.5, 72.6] },
+      "연간": { title: "2026년, 안전운전이 만든 절감", asOf: "2~7월 누적 · 412대",
+        km: "16,240,000", kmSub: "도입 후 6개월 누적", eff: "+4.1%", effSub: "2.43 → 2.53 km/L (경유·기간 평균)",
+        fuel: "146,900", fuelSub: "베이스라인 대비 -4.2%", co2: "393.7", co2Pct: "-4.5%",
+        trendTitle: "누적 추이 — 연료 절감 · CO₂ 절감", fuelUnit: "천L",
+        trendLabels: ["2월", "3월", "4월", "5월", "6월", "7월"],
+        trendFuel: [21.4, 44.2, 68.3, 93.5, 119.8, 146.9], trendCo2: [57.4, 118.5, 183.1, 250.6, 321.1, 393.7] },
+    };
+    return P[this.state.period] || P["월간"];
+  }
+
+  // 데모용 확인 토스트 — 정식 기능이 아닌 버튼의 무반응(silent no-op) 방지
+  _toast(msg) {
+    const t = document.createElement("div");
+    t.textContent = msg;
+    t.style.cssText = "position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:rgba(25,31,40,0.92);color:#fff;font:700 13px/1.4 'Pretendard Variable',Pretendard,sans-serif;padding:11px 18px;border-radius:9999px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:9999;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap;";
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = "1"; t.style.transform = "translateX(-50%) translateY(-6px)"; });
+    setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2200);
+  }
+
+  badge(color, text) {
+    const map = {
+      green:  { bg: "rgba(3,178,108,0.12)",  fg: "#03965c" },
+      red:    { bg: "rgba(240,68,82,0.12)",   fg: "#e42939" },
+      orange: { bg: "rgba(254,152,0,0.14)",   fg: "#c47600" },
+      blue:   { bg: "var(--primary-weak)",    fg: "var(--blue-600)" },
+      grey:   { bg: "var(--grey-100)",        fg: "var(--text-body)" },
+    };
+    const c = map[color] || map.grey;
+    return { display: "inline-flex", alignItems: "center", height: 24, padding: "0 9px",
+      borderRadius: 8, background: c.bg, color: c.fg, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" };
+  }
+
+  dot(color) {
+    const map = { red: "var(--red-500)", orange: "var(--orange-500)", blue: "var(--primary)", green: "var(--success)" };
+    return { width: 10, height: 10, borderRadius: "50%", flex: "none", background: map[color] || map.blue,
+      boxShadow: `0 0 0 4px ${color === "red" ? "rgba(240,68,82,.12)" : color === "orange" ? "rgba(254,152,0,.14)" : "rgba(49,130,246,.12)"}` };
+  }
+
+  renderVals() {
+    const dash = this.state.dash;
+    const titles = {
+      "1": ["통합 운영 Dashboard", "대구 시내버스 412대 · OBD·DTG 실시간 수집"],
+      "2": ["탄소·연료 Dashboard", "안전운전 기반 연료·CO₂ 절감 성과 — 연비 실측 검증"],
+      "3": ["안전운행 Dashboard", "DTG 주행 데이터 기반 운전 습관 분석"],
+      "V": ["차량 관리", "차량 등록·조회와 정비 이력, AI 예지정비를 관리해요"],
+      "D": ["운전자 관리", "기사별 운전점수와 교육·성과를 관리해요"],
+      "R": ["노선 관리", "노선 정보와 운행 데이터, 노선 효율을 분석해요"],
+      "P": ["AI Planning", "전기버스 전환·충전 최적화를 AI 시뮬레이션으로 계획해요"],
+      "T": ["Reports", "지자체 제출·내부 보고용 문서를 운영 데이터로 자동 생성해요"],
+    };
+
+    // 계통별 현황
+    const sysRaw = [
+      { name: "급행", buses: 96, run: 84, color: "var(--primary)" },
+      { name: "간선", buses: 168, run: 148, color: "var(--success)" },
+      { name: "지선", buses: 108, run: 96, color: "var(--teal-500)" },
+      { name: "순환", buses: 40, run: 28, color: "var(--orange-500)" },
+    ];
+    const systems = sysRaw.map(s => {
+      const pct = Math.round((s.run / s.buses) * 100);
+      return { name: s.name, label: `${s.run} / ${s.buses}대`,
+        barStyle: { width: pct + "%", height: "100%", borderRadius: 9999, background: s.color, transition: "width .5s" } };
+    });
+
+    // 계통 필터 chips
+    const chips = ["전체", "급행", "간선", "지선", "순환"].map(label => ({
+      label, onClick: () => this.setState({ sys: label }), style: this.chipStyle(this.state.sys === label) }));
+
+    // 기간 토글 (일간/월간/연간) — 탄소·연료 성과 카드·추이 차트와 연동
+    const periodChips = ["일간", "월간", "연간"].map(label => {
+      const active = this.state.period === label;
+      return { label, onClick: () => this.setState({ period: label }),
+        style: { appearance: "none", border: "none", fontFamily: "inherit", fontSize: 12,
+          fontWeight: active ? 700 : 600, padding: "6px 12px", borderRadius: 8, cursor: "pointer",
+          color: active ? "var(--text-strong)" : "var(--text-secondary)",
+          background: active ? "#fff" : "transparent",
+          boxShadow: active ? "0 1px 3px rgba(0,0,0,.06)" : "none" } };
+    });
+    const P = this.periodData();
+
+    // 노선별 현황
+    const routesRaw = [
+      { no: "급행1", co: "세운버스(주)", sys: "급행", stop: "동대구역 ↔ 서부정류장", dispatch: "24 / 21", rate: "94%", status: "정상", c: "green" },
+      { no: "간선 401", co: "세진교통(주)", sys: "간선", stop: "반월당 ↔ 칠곡경대병원", dispatch: "18 / 15", rate: "88%", status: "정상", c: "green" },
+      { no: "간선 649", co: "경북교통(주)", sys: "간선", stop: "성서공단 ↔ 대구역", dispatch: "12 / 10", rate: "83%", status: "지연", c: "orange" },
+      { no: "순환 2-1", co: "신흥버스(주)", sys: "순환", stop: "범어네거리 순환", dispatch: "9 / 8", rate: "90%", status: "정상", c: "green" },
+      { no: "지선 356", co: "동명교통(주)", sys: "지선", stop: "두류역 ↔ 시지지구", dispatch: "16 / 13", rate: "81%", status: "지연", c: "orange" },
+      { no: "급행5", co: "세운버스(주)", sys: "급행", stop: "대구공항 ↔ 계명대", dispatch: "14 / 11", rate: "79%", status: "혼잡", c: "red" },
+    ];
+    const routes = routesRaw
+      .filter(r => this.state.sys === "전체" || r.sys === this.state.sys)
+      .map(r => ({ ...r, badgeStyle: this.badge(r.c) }));
+
+    // 이상 알림
+    const alerts = [
+      { title: "배터리 전압 경고", vehicle: "세운 1183호 · OBD", time: "2분 전", level: "위험", c: "red" },
+      { title: "냉각수 온도 상승", vehicle: "세진 2044호 · OBD", time: "8분 전", level: "주의", c: "orange" },
+      { title: "급감속 다발 감지", vehicle: "경북 3201호 · DTG", time: "15분 전", level: "주의", c: "orange" },
+      { title: "DTG 통신 두절 복구", vehicle: "신흥 0762호 · DTG", time: "32분 전", level: "정보", c: "blue" },
+    ].map(a => ({ ...a, dotStyle: this.dot(a.c), badgeStyle: this.badge(a.c) }));
+
+    // 기사 랭킹
+    const drivers = [
+      { rank: 1, name: "김성호", co: "세운버스(주)", score: "96.2" },
+      { rank: 2, name: "이재훈", co: "세진교통(주)", score: "94.8" },
+      { rank: 3, name: "박민수", co: "경북교통(주)", score: "93.1" },
+      { rank: 4, name: "정우성", co: "신흥버스(주)", score: "91.7" },
+      { rank: 5, name: "최동현", co: "동명교통(주)", score: "90.4" },
+    ].map(d => {
+      const top = d.rank <= 3;
+      return { ...d, rankStyle: { width: 26, height: 26, flex: "none", borderRadius: 8, display: "flex",
+        alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700,
+        background: top ? "var(--primary)" : "var(--grey-100)", color: top ? "#fff" : "var(--text-body)" } };
+    });
+
+    // 차량별 점수
+    const vehicles = [
+      { name: "세운 1183호", accel: 12, decel: 9, speed: 1, score: 88, grade: "양호", c: "green" },
+      { name: "세진 2044호", accel: 24, decel: 18, speed: 4, score: 74, grade: "주의", c: "orange" },
+      { name: "경북 3201호", accel: 31, decel: 27, speed: 6, score: 66, grade: "위험", c: "red" },
+      { name: "신흥 0762호", accel: 9, decel: 7, speed: 0, score: 92, grade: "우수", c: "green" },
+      { name: "동명 1547호", accel: 18, decel: 14, speed: 2, score: 81, grade: "양호", c: "green" },
+      { name: "세운 2290호", accel: 27, decel: 22, speed: 5, score: 70, grade: "주의", c: "orange" },
+    ].map(v => ({ ...v, badgeStyle: this.badge(v.c) }));
+
+    // AI 이상 탐지
+    const anomalies = [
+      { title: "연비 급감", vehicle: "세진 2044호 · OBD", desc: "연비 2.51 → 1.93 km/L (-23%) — 인젝터 점검 권장", sev: "높음", c: "red" },
+      { title: "비정상 공회전", vehicle: "경북 3201호 · DTG", desc: "공회전 38분/일 → 112분/일 (3배) — 차고지 대기 구간", sev: "중간", c: "orange" },
+      { title: "배터리 열화 추세", vehicle: "세운 0091호 · OBD", desc: "전비 1.12 → 1.04 km/kWh, 6주 연속 하락", sev: "관찰", c: "blue" },
+    ].map(a => ({ ...a, dotStyle: this.dot(a.c), badgeStyle: this.badge(a.c) }));
+
+    // 위험 구간
+    const zones = [
+      { loc: "반월당 네거리", type: "급감속 다발", count: "주 142건", level: "높음", c: "red" },
+      { loc: "동대구역 진입로", type: "과속 구간", count: "주 63건", level: "중간", c: "orange" },
+      { loc: "만평 네거리", type: "급가속 다발", count: "주 58건", level: "중간", c: "orange" },
+    ].map(z => ({ ...z, badgeStyle: this.badge(z.c) }));
+
+    // AI 추천
+    const recs = [
+      { tag: "탄소", title: "전기버스 우선 전환 — 간선 401 노후 경유 6대", desc: "차령 9년 이상 · 연비 하위 15% (2.21 km/L) · 일 주행 238km로 전환 효과가 가장 커요.",
+        basis: "근거 — 대당 연 62,000km × 경유 2.68 kgCO₂/L 대비 전력 간접배출 차감 시 연 35.7 tCO₂ 감축. 6대 = 연 214 tCO₂ · 연료비 246,000,000원 절감, 보조금 반영 ROI 2.7년.", c: "green" },
+      { tag: "운영", title: "충전 스케줄 최적화", desc: "심야 경부하(23~09시) 충전 비중 41% → 68%로 높이면 kWh당 62원 절감돼요.", basis: false, c: "blue" },
+      { tag: "안전", title: "공회전 저감 교육", desc: "공회전 상위 12명이 전체 공회전 시간의 31%를 차지 — DTG 데이터 기반 맞춤 교육 대상이에요.", basis: false, c: "blue" },
+      { tag: "정비", title: "예지정비 — 세진 2044호", desc: "OBD 연비 2.51 → 1.93 km/L 급감, 인젝터 이상 패턴과 87% 일치.", basis: false, c: "green" },
+    ].map(r => ({ ...r, tagStyle: this.badge(r.c === "green" ? "green" : "blue", r.tag) }));
+
+    // ===== 차량 관리 =====
+    const mgVehiclesRaw = [
+      { no: "세운 1183호", co: "세운버스(주)", fuel: "전기", km: "82,400km", lastFix: "06.28", status: "운행", c: "blue" },
+      { no: "세진 2044호", co: "세진교통(주)", fuel: "경유", km: "214,800km", lastFix: "07.02", status: "정비", c: "orange" },
+      { no: "경북 3201호", co: "경북교통(주)", fuel: "CNG", km: "168,200km", lastFix: "05.19", status: "운행", c: "blue" },
+      { no: "신흥 0762호", co: "신흥버스(주)", fuel: "전기", km: "41,900km", lastFix: "06.11", status: "운행", c: "blue" },
+      { no: "동명 1547호", co: "동명교통(주)", fuel: "CNG", km: "192,300km", lastFix: "07.04", status: "대기", c: "grey" },
+      { no: "세운 2290호", co: "세운버스(주)", fuel: "경유", km: "238,600km", lastFix: "06.30", status: "운행", c: "blue" },
+      { no: "세진 1812호", co: "세진교통(주)", fuel: "경유", km: "201,100km", lastFix: "04.22", status: "점검 필요", c: "red" },
+    ];
+    const q = this.state.vq.trim();
+    const mgVehicles = mgVehiclesRaw
+      .filter(v => !q || v.no.includes(q) || v.co.includes(q))
+      .map(v => ({ ...v, badgeStyle: this.badge(v.c) }));
+
+    const predicts = [
+      { no: "세진 2044호", part: "인젝터", eta: "예상 고장 18일 이내", prob: "87%", c: "red" },
+      { no: "세운 2290호", part: "브레이크 패드", eta: "예상 교체 25일 이내", prob: "74%", c: "orange" },
+      { no: "경북 3201호", part: "배터리(보조)", eta: "성능 저하 추세 관찰", prob: "62%", c: "orange" },
+    ].map(p => ({ ...p, dotStyle: this.dot(p.c), badgeStyle: this.badge(p.c) }));
+
+    const fixLogs = [
+      { no: "세진 2044호", date: "07.02", work: "엔진 냉각계통 점검 · 서모스탯 교체", cost: "842,000원" },
+      { no: "동명 1547호", date: "07.04", work: "정기 점검 · 엔진오일 및 필터 교체", cost: "316,000원" },
+      { no: "세운 1183호", date: "06.28", work: "배터리 셀 밸런싱 · BMS 펌웨어 업데이트", cost: "128,000원" },
+    ];
+
+    // ===== 운전자 관리 =====
+    const driverChips = ["전체", "우수", "교육 대상"].map(label => ({
+      label, onClick: () => this.setState({ drvFilter: label }), style: this.chipStyle(this.state.drvFilter === label) }));
+    const deltaCell = (up) => ({ padding: "11px 10px", fontSize: 13, fontWeight: 700, textAlign: "right",
+      fontVariantNumeric: "tabular-nums", borderBottom: "1px solid var(--divider)",
+      color: up ? "var(--success)" : "var(--red-500)" });
+    const mgDriversRaw = [
+      { name: "김성호", co: "세운버스(주)", route: "급행1", score: "96.2", delta: "+1.4", up: true, grade: "우수", c: "green" },
+      { name: "이재훈", co: "세진교통(주)", route: "간선 401", score: "94.8", delta: "+0.8", up: true, grade: "우수", c: "green" },
+      { name: "박민수", co: "경북교통(주)", route: "간선 649", score: "93.1", delta: "+2.2", up: true, grade: "우수", c: "green" },
+      { name: "정우성", co: "신흥버스(주)", route: "순환 2-1", score: "91.7", delta: "-0.3", up: false, grade: "우수", c: "green" },
+      { name: "최동현", co: "동명교통(주)", route: "지선 356", score: "84.4", delta: "+1.1", up: true, grade: "일반", c: "grey" },
+      { name: "한지훈", co: "세운버스(주)", route: "급행5", score: "68.2", delta: "-2.8", up: false, grade: "교육 대상", c: "orange" },
+      { name: "오세영", co: "세진교통(주)", route: "간선 401", score: "64.5", delta: "-1.6", up: false, grade: "교육 대상", c: "orange" },
+    ];
+    const f = this.state.drvFilter;
+    const mgDrivers = mgDriversRaw
+      .filter(d => f === "전체" || d.grade === f)
+      .map(d => ({ ...d, deltaStyle: deltaCell(d.up), badgeStyle: this.badge(d.c) }));
+
+    const eduTargets = [
+      { name: "한지훈", co: "세운버스(주)", issue: "급가속 다발 · 공회전 과다", score: "68.2", c: "orange" },
+      { name: "오세영", co: "세진교통(주)", issue: "과속 반복 · 급감속 다발", score: "64.5", c: "orange" },
+      { name: "임태규", co: "경북교통(주)", issue: "공회전 과다", score: "69.8", c: "orange" },
+    ].map(e => ({ ...e, badgeStyle: this.badge(e.c) }));
+
+    // ===== 노선 관리 =====
+    // ===== AI Planning =====
+    const plan = this.planCalc(this.state.planN);
+    const planScenarios = [
+      { label: "보수 6대", n: 6 }, { label: "균형 12대", n: 12 }, { label: "공격 24대", n: 24 },
+    ].map(s => ({ label: s.label, onClick: () => this.setState({ planN: s.n }), style: this.chipStyle(this.state.planN === s.n) }));
+    const planTargets = [
+      { rank: 1, no: "세진 1812호", detail: "차령 11년 · 연비 2.08 km/L · 일 244km", co2: "36.2t/년" },
+      { rank: 2, no: "세운 2290호", detail: "차령 10년 · 연비 2.15 km/L · 일 238km", co2: "35.9t/년" },
+      { rank: 3, no: "경북 3117호", detail: "차령 9년 · 연비 2.21 km/L · 일 231km", co2: "35.6t/년" },
+      { rank: 4, no: "동명 0912호", detail: "차령 9년 · 연비 2.24 km/L · 일 226km", co2: "35.3t/년" },
+      { rank: 5, no: "세진 2044호", detail: "차령 8년 · 연비 급감(인젝터) · 일 229km", co2: "35.0t/년" },
+    ].map(t => ({ ...t, rankStyle: { width: 24, height: 24, flex: "none", borderRadius: 7, display: "flex",
+      alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700,
+      background: t.rank <= 3 ? "var(--primary)" : "var(--grey-200)", color: t.rank <= 3 ? "#fff" : "var(--text-body)" } }));
+
+    // ===== Reports =====
+    const reportsRaw = [
+      { title: "월간 탄소·연료 성과 보고서", period: "2026년 7월", status: "생성됨", c: "green", ready: true,
+        rows: [
+          { k: "총 주행거리 (DTG)", v: "2,843,000 km" }, { k: "연료 절감 (베이스라인 대비)", v: "27,100 L (-4.3%)" },
+          { k: "CO₂ 감축", v: "72.6 tCO₂ (-4.7%)" }, { k: "배출 원단위", v: "1.07 → 1.02 kgCO₂/km" },
+          { k: "연간 누적 감축", v: "393.7 tCO₂" } ],
+        summary: "7월 감축의 62%는 공회전 감소(42→34분)에서 발생했어요. 안전운전 점수와 연비의 상관(r=0.81)이 유지되고 있어 코칭 효과가 절감으로 이어지는 구조가 검증됐어요." },
+      { title: "안전운행 월보", period: "2026년 7월", status: "생성됨", c: "green", ready: true,
+        rows: [
+          { k: "평균 안전운전 점수", v: "82.4점 (+2.1)" }, { k: "급가속", v: "342건 (-18%)" },
+          { k: "급감속", v: "289건 (-12%)" }, { k: "과속", v: "47건 (-31%)" },
+          { k: "교육 대상 (70점 미만)", v: "23명" } ],
+        summary: "위험 이벤트가 전월 대비 전 항목 감소했어요. 반월당 네거리 급감속은 기사앱 예측 감속 코칭 적용 후 주 142건 → 96건으로 줄었어요." },
+      { title: "온실가스 외부사업(KOC) 실적 명세", period: "2026년 2~6월 (확정분)", status: "생성됨", c: "green", ready: true,
+        rows: [
+          { k: "인증 대상 감축량", v: "321.1 tCO₂" }, { k: "예상 크레딧 수익 (8,900원/t)", v: "2,858,000원" },
+          { k: "증빙 데이터", v: "OBD 연료분사량 × DTG 교차 검증" }, { k: "검증기관 제출", v: "8월 예정" } ],
+        summary: "베이스라인 산정 방식(도입 전 12개월 노선별 연비)이 외부사업 방법론 요건에 부합해요. 7월분은 확정 후 자동 반영돼요." },
+      { title: "운수회사별 성과 정산 리포트", period: "2026년 7월", status: "월말 생성", c: "grey", ready: false, rows: [], summary: "" },
+    ];
+    const repSel = Math.min(this.state.repSel, reportsRaw.length - 1);
+    const reports = reportsRaw.map((r, i) => ({
+      title: r.title, period: r.period, status: r.status, badgeStyle: this.badge(r.c),
+      onClick: () => this.setState({ repSel: i }),
+      style: { display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "12px 13px",
+        border: i === repSel ? "1px solid var(--primary)" : "1px solid var(--border)", borderRadius: 12,
+        background: i === repSel ? "var(--primary-weak)" : "#fff", cursor: "pointer", fontFamily: "inherit" } }));
+    const rep = reportsRaw[repSel];
+
+    const routeStats = [
+      { no: "급행1", seg: "동대구역 ↔ 서부정류장", trips: "142회", pax: "18,420명", eff: "31.2L", co2: "0.84kg", grade: "A", c: "green" },
+      { no: "간선 401", seg: "반월당 ↔ 칠곡경대병원", trips: "118회", pax: "14,260명", eff: "34.8L", co2: "0.92kg", grade: "A", c: "green" },
+      { no: "간선 649", seg: "성서공단 ↔ 대구역", trips: "96회", pax: "11,830명", eff: "38.1L", co2: "1.03kg", grade: "B", c: "blue" },
+      { no: "순환 2-1", seg: "범어네거리 순환", trips: "88회", pax: "7,940명", eff: "41.5L", co2: "1.12kg", grade: "B", c: "blue" },
+      { no: "지선 356", seg: "두류역 ↔ 시지지구", trips: "74회", pax: "5,210명", eff: "46.9L", co2: "1.28kg", grade: "C", c: "orange" },
+      { no: "급행5", seg: "대구공항 ↔ 계명대", trips: "64회", pax: "4,080명", eff: "49.3L", co2: "1.34kg", grade: "C", c: "orange" },
+    ].map(r => ({ ...r, badgeStyle: this.badge(r.c) }));
+
+    return {
+      go1: () => this.setState({ dash: "1" }),
+      go2: () => this.setState({ dash: "2" }),
+      go3: () => this.setState({ dash: "3" }),
+      goV: () => this.setState({ dash: "V" }),
+      goD: () => this.setState({ dash: "D" }),
+      goR: () => this.setState({ dash: "R" }),
+      goP: () => this.setState({ dash: "P" }),
+      goT: () => this.setState({ dash: "T" }),
+      nav1: this.navStyle("1"), nav2: this.navStyle("2"), nav3: this.navStyle("3"),
+      navV: this.navStyle("V"), navD: this.navStyle("D"), navR: this.navStyle("R"),
+      navP: this.navStyle("P"), navT: this.navStyle("T"),
+      isDash1: dash === "1", isDash2: dash === "2", isDash3: dash === "3",
+      isPageV: dash === "V", isPageD: dash === "D", isPageR: dash === "R",
+      isPageP: dash === "P", isPageT: dash === "T",
+      pageTitle: titles[dash][0], pageSub: titles[dash][1],
+      systems, chips, routes, alerts, drivers, vehicles, anomalies, zones, recs,
+      mgVehicles, predicts, fixLogs, driverChips, mgDrivers, eduTargets, routeStats,
+      periodChips,
+      flowTitle: P.title, flowAsOf: P.asOf, flowKm: P.km, flowKmSub: P.kmSub,
+      flowEff: P.eff, flowEffSub: P.effSub, flowFuel: P.fuel, flowFuelSub: P.fuelSub,
+      flowCo2: P.co2, flowCo2Pct: P.co2Pct, trendTitle: P.trendTitle, trendFuelUnit: P.fuelUnit,
+      notifOpen: this.state.notif, hasUnread: this.state.unread, notifCount: alerts.length,
+      toggleNotif: () => this.setState({ notif: !this.state.notif }),
+      clearNotif: () => this.setState({ unread: false, notif: false }),
+      onRegisterVehicle: () => this._toast("차량 등록은 정식 버전에서 제공되는 기능이에요"),
+      onAssignEdu: () => this._toast("교육 대상 3명에게 교육 과정을 배정했어요"),
+      mgVehiclesEmpty: mgVehicles.length === 0,
+      planN: this.state.planN,
+      onPlanN: (e) => this.setState({ planN: Math.max(1, Math.min(50, parseInt(e.target.value, 10) || 1)) }),
+      planScenarios, planTargets,
+      planCo2: plan.co2.toLocaleString(), planFuelWon: plan.fuelEok.toFixed(1),
+      planInvest: plan.investEok.toFixed(1), planRoi: plan.roi.toFixed(1),
+      planKoc: Math.round(plan.co2 * 8900 / 10000).toLocaleString() + "만원",
+      planGoalPct: Math.round(plan.co2 / 3000 * 100) + "%",
+      reports, repTitle: rep.title, repPeriod: rep.period, repRows: rep.rows, repSummary: rep.summary,
+      repReady: rep.ready, repPending: !rep.ready,
+      onExportPdf: () => this._toast("PDF 내보내기는 정식 버전에서 제공되는 기능이에요"),
+      onSubmitGov: () => this._toast("지자체 제출함으로 전송했어요 (데모)"),
+      coRanks: [
+        { rank: 1, name: "세운버스(주)", buses: "98대", pct: "-5.8%", co2: "18.4t", w: 100 },
+        { rank: 2, name: "세진교통(주)", buses: "86대", pct: "-4.9%", co2: "15.2t", w: 84 },
+        { rank: 3, name: "경북교통(주)", buses: "84대", pct: "-4.1%", co2: "14.1t", w: 71 },
+        { rank: 4, name: "신흥버스(주)", buses: "76대", pct: "-3.6%", co2: "13.0t", w: 62 },
+        { rank: 5, name: "동명교통(주)", buses: "68대", pct: "-3.2%", co2: "11.9t", w: 55 },
+      ].map(c => ({ ...c,
+        rankStyle: { width: 24, height: 24, flex: "none", borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 12, fontWeight: 700, background: c.rank === 1 ? "var(--success)" : "var(--grey-100)", color: c.rank === 1 ? "#fff" : "var(--text-body)" },
+        barStyle: { width: c.w + "%", height: "100%", borderRadius: 9999, background: c.rank === 1 ? "var(--success)" : "rgba(3,178,108,0.45)" } })),
+      vehicleQuery: this.state.vq,
+      onVehicleSearch: (e) => this.setState({ vq: e.target.value }),
+      mapZoomIn: () => { if (this._map) this._map.zoomIn(); },
+      mapZoomOut: () => { if (this._map) this._map.zoomOut(); },
+    };
+  }
+
+  componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
+  componentDidUpdate() { this._tick(); }
+  componentWillUnmount() { clearInterval(this._iv); this._destroy(); }
+
+  _canvasIds(dash) {
+    return ({ "2": ["c-trend", "c-forecast", "c-system", "c-route", "c-fueltype", "c-corr"],
+      "3": ["c-gauge", "c-events"],
+      "V": ["c-vstatus"], "R": ["c-reff", "c-rpax"], "P": ["c-plan"] })[dash] || [];
+  }
+  _tick() {
+    this._tickMap();
+    if (!window.Chart) return;
+    const dash = this.state.dash;
+    const ids = this._canvasIds(dash);
+    const sentinel = ids[0];
+    const missing = sentinel && document.getElementById(sentinel) && !window.Chart.getChart(sentinel);
+    if (dash + "|" + this.state.period + "|" + this.state.planN !== this._painted || missing) {
+      this._destroy();
+      this._paint();
+    }
+  }
+  _destroy() {
+    if (this.charts) Object.values(this.charts).forEach(c => { try { c.destroy(); } catch (e) {} });
+    this.charts = {};
+    this._painted = null;
+  }
+
+  _tickMap() {
+    if (this.state.dash !== "1" || !window.L || !window.L.heatLayer) return;
+    const el = document.getElementById("map-live");
+    if (!el) return;
+    if (this._map && this._map._container === el) return;
+    if (this._map) { try { this._map.remove(); } catch (e) {} this._map = null; }
+    const L = window.L;
+    const map = L.map(el, { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
+    map.setView([35.8664, 128.5951], 13);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);
+
+    // 급가속·급감속 다발 지점 (핫스팟 중심 + 산포)
+    const hotspots = [
+      { c: [35.8659, 128.5936], n: 60, w: 1.0, s: 0.004 },   // 반월당 네거리
+      { c: [35.8770, 128.6260], n: 45, w: 0.9, s: 0.004 },   // 동대구역 진입로
+      { c: [35.8935, 128.5830], n: 38, w: 0.8, s: 0.005 },   // 만평 네거리
+      { c: [35.8563, 128.5622], n: 26, w: 0.6, s: 0.005 },   // 두류
+      { c: [35.8580, 128.6350], n: 22, w: 0.55, s: 0.005 },  // 수성교
+      { c: [35.8850, 128.6110], n: 20, w: 0.5, s: 0.006 },   // 경대교
+      { c: [35.8460, 128.6010], n: 16, w: 0.4, s: 0.006 },   // 앞산순환로
+    ];
+    const pts = [];
+    hotspots.forEach(h => {
+      for (let i = 0; i < h.n; i++) {
+        pts.push([h.c[0] + (Math.random() - 0.5) * h.s, h.c[1] + (Math.random() - 0.5) * h.s * 1.4, h.w * (0.5 + Math.random() * 0.5)]);
+      }
+    });
+    L.heatLayer(pts, { radius: 26, blur: 20, maxZoom: 15, minOpacity: 0.25,
+      gradient: { 0.25: "#3182f6", 0.55: "#fe9800", 0.85: "#f04452" } }).addTo(map);
+
+    // 차량 마커
+    const vh = [
+      { p: [35.8659, 128.5990], c: "#3182f6" }, { p: [35.8714, 128.6014], c: "#03b26c" },
+      { p: [35.8790, 128.6285], c: "#3182f6" }, { p: [35.8600, 128.5700], c: "#03b26c" },
+      { p: [35.8930, 128.5850], c: "#f04452" }, { p: [35.8500, 128.6200], c: "#3182f6" },
+      { p: [35.8850, 128.5600], c: "#fe9800" }, { p: [35.8560, 128.6420], c: "#03b26c" },
+    ];
+    vh.forEach(v => L.circleMarker(v.p, { radius: 7, color: "#fff", weight: 2.5, fillColor: v.c, fillOpacity: 1 }).addTo(map));
+
+    // 주요 지점 라벨
+    const pill = (name) => L.divIcon({ className: "", iconAnchor: [0, 11],
+      html: '<div style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #e5e8eb;border-radius:9999px;padding:3px 9px;font-family:Pretendard Variable,Pretendard,sans-serif;font-size:11px;font-weight:700;color:#333d4b;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.1);">' + name + '</div>' });
+    [[35.8659, 128.5936, "반월당"], [35.8770, 128.6260, "동대구역"], [35.8935, 128.5830, "만평 네거리"], [35.8563, 128.5622, "두류"]]
+      .forEach(s => L.marker([s[0], s[1]], { icon: pill(s[2]), interactive: false }).addTo(map));
+
+    this._map = map;
+    setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 200);
+  }
+  _paint() {
+    const C = window.Chart;
+    if (!C) return;
+    this.charts = this.charts || {};
+    C.defaults.font.family = "Pretendard Variable, Pretendard, sans-serif";
+    C.defaults.font.weight = 600;
+    C.defaults.color = "#8b95a1";
+    const blue = "#3182f6", green = "#03b26c", red = "#f04452", orange = "#fe9800", teal = "#18a5a5", faint = "#e5e8eb";
+    const mk = (id, cfg) => {
+      const el = document.getElementById(id);
+      if (el) this.charts[id] = new C(el, cfg);
+    };
+    const grid = { color: "#f2f4f6" }, noGrid = { display: false };
+    const noLegend = { legend: { display: false } };
+    setTimeout(() => {
+      const d = this.state.dash;
+      if (d === "2") {
+        const P = this.periodData();
+        mk("c-trend", { data: { labels: P.trendLabels,
+          datasets: [
+            { type: "bar", label: "연료 절감(" + P.fuelUnit + ")", data: P.trendFuel, backgroundColor: "rgba(49,130,246,.75)",
+              borderRadius: 7, barPercentage: .5, yAxisID: "yL", order: 2 },
+            { type: "line", label: "CO₂ 절감(t)", data: P.trendCo2, borderColor: green,
+              backgroundColor: green, tension: .4, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: green, yAxisID: "yT", order: 1 } ] },
+          options: { maintainAspectRatio: false, plugins: noLegend,
+            scales: {
+              yL: { position: "left", grid, ticks: { callback: v => v + P.fuelUnit } },
+              yT: { position: "right", grid: { drawOnChartArea: false }, ticks: { callback: v => v + "t" } },
+              x: { grid: noGrid } } } });
+        const corrPts = [];
+        for (let i = 0; i < 90; i++) {
+          const score = 55 + Math.random() * 42;
+          const mpg = 1.95 + (score - 55) * 0.011 + (Math.random() - 0.5) * 0.22;
+          corrPts.push({ x: Math.round(score * 10) / 10, y: Math.round(mpg * 100) / 100 });
+        }
+        mk("c-corr", { data: { datasets: [
+            { type: "scatter", label: "차량", data: corrPts, backgroundColor: "rgba(49,130,246,0.45)", pointRadius: 3.5 },
+            { type: "line", label: "추세", data: [{ x: 55, y: 1.95 }, { x: 97, y: 2.42 }], borderColor: green, borderWidth: 2.5, borderDash: [7, 5], pointRadius: 0 } ] },
+          options: { maintainAspectRatio: false, plugins: noLegend,
+            scales: { x: { min: 50, max: 100, grid: noGrid, title: { display: true, text: "안전운전 점수", font: { size: 11, weight: 600 } } },
+              y: { grid, title: { display: true, text: "연비 km/L", font: { size: 11, weight: 600 } } } } } });
+        mk("c-fueltype", { type: "doughnut", data: { labels: ["경유", "CNG", "전기(간접)"],
+          datasets: [{ data: [78, 19, 3], backgroundColor: [faint, green, blue], borderWidth: 0 }] },
+          options: { cutout: "68%", maintainAspectRatio: false, plugins: noLegend } });
+        mk("c-forecast", { type: "line", data: { labels: ["7월", "8월", "9월", "10월", "11월", "12월", "1월"],
+          datasets: [
+            { label: "실측", data: [72.6, null, null, null, null, null, null], borderColor: green, backgroundColor: green, pointRadius: 4, borderWidth: 2.5 },
+            { label: "예측", data: [72.6, 73.8, 75.1, 76.0, 76.8, 78.2, 79.5], borderColor: blue, borderDash: [6, 5], backgroundColor: "rgba(49,130,246,.06)", fill: true, tension: .4, pointRadius: 3, borderWidth: 2.5 } ] },
+          options: { maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, padding: 12 } } },
+            scales: { y: { grid, ticks: { callback: v => v + "t" } }, x: { grid: noGrid } } } });
+        mk("c-system", { type: "bar", data: { labels: ["급행", "간선", "지선", "순환"],
+          datasets: [{ data: [18.4, 31.2, 16.8, 6.2], backgroundColor: blue, borderRadius: 8, barPercentage: .6 }] },
+          options: { maintainAspectRatio: false, plugins: noLegend, scales: { y: { grid, ticks: { callback: v => v + "t" } }, x: { grid: noGrid } } } });
+        mk("c-route", { type: "bar", data: { labels: ["급행1", "간선 401", "간선 649", "순환 2-1", "지선 356"],
+          datasets: [{ data: [3.9, 3.2, 2.7, 1.9, 1.6], backgroundColor: green, borderRadius: 8, barPercentage: .65 }] },
+          options: { indexAxis: "y", maintainAspectRatio: false, plugins: noLegend, scales: { x: { grid, ticks: { callback: v => v + "t" } }, y: { grid: noGrid } } } });
+      } else if (d === "3") {
+        mk("c-gauge", { type: "doughnut", data: { labels: ["점수", ""],
+          datasets: [{ data: [82.4, 17.6], backgroundColor: [blue, faint], borderWidth: 0 }] },
+          options: { rotation: -90, circumference: 180, cutout: "76%", maintainAspectRatio: false, plugins: noLegend } });
+        mk("c-events", { type: "bar", data: { labels: ["급가속", "급감속", "과속", "공회전"],
+          datasets: [{ data: [342, 289, 47, 312], backgroundColor: [orange, orange, red, teal], borderRadius: 8, barPercentage: .6 }] },
+          options: { maintainAspectRatio: false, plugins: noLegend, scales: { y: { grid, ticks: { callback: v => v + "건" } }, x: { grid: noGrid } } } });
+      } else if (d === "V") {
+        mk("c-vstatus", { type: "doughnut", data: { labels: ["운행", "정비", "대기"],
+          datasets: [{ data: [356, 12, 44], backgroundColor: [blue, orange, faint], borderWidth: 0 }] },
+          options: { cutout: "70%", maintainAspectRatio: false, plugins: noLegend } });
+      } else if (d === "P") {
+        const n = this.state.planN;
+        const curve = [];
+        for (let k = 1; k <= 50; k++) curve.push({ x: k, y: Math.round(this.planCalc(k).co2) });
+        mk("c-plan", { data: { datasets: [
+            { type: "line", label: "연 감축량", data: curve, borderColor: blue, backgroundColor: "rgba(49,130,246,.06)",
+              fill: true, tension: .3, pointRadius: 0, borderWidth: 2.5 },
+            { type: "scatter", label: "현재 계획", data: [{ x: n, y: this.planCalc(n).co2 }],
+              pointRadius: 7, backgroundColor: green, borderColor: "#fff", borderWidth: 2.5 } ] },
+          options: { maintainAspectRatio: false, plugins: noLegend, animation: false,
+            scales: { x: { type: "linear", min: 1, max: 50, grid: noGrid, ticks: { stepSize: 7 },
+                title: { display: true, text: "전환 대수", font: { size: 11, weight: 600 } } },
+              y: { grid, ticks: { callback: v => v + "t" } } } } });
+      } else if (d === "R") {
+        mk("c-reff", { type: "bar", data: { labels: ["급행1", "간선 401", "간선 649", "순환 2-1", "지선 356", "급행5"],
+          datasets: [{ data: [31.2, 34.8, 38.1, 41.5, 46.9, 49.3], backgroundColor: [green, green, blue, blue, orange, orange], borderRadius: 8, barPercentage: .6 }] },
+          options: { maintainAspectRatio: false, plugins: noLegend, scales: { y: { grid, ticks: { callback: v => v + "L" } }, x: { grid: noGrid } } } });
+        mk("c-rpax", { type: "bar", data: { labels: ["급행", "간선", "지선", "순환"],
+          datasets: [{ data: [128.4, 214.6, 96.2, 42.8], backgroundColor: blue, borderRadius: 8, barPercentage: .6 }] },
+          options: { maintainAspectRatio: false, plugins: noLegend, scales: { y: { grid, ticks: { callback: v => v + "만명" } }, x: { grid: noGrid } } } });
+      }
+      if (this._canvasIds(d).length === 0 || Object.keys(this.charts).length > 0) this._painted = d + "|" + this.state.period + "|" + this.state.planN;
+    }, 30);
+  }
+}
+</script>
+</body>
+</html>

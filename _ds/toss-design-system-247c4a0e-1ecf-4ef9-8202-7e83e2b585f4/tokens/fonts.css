@@ -1,0 +1,53 @@
+/* Pretendard — open-source substitute for Toss Product Sans.
+   Toss Product Sans is proprietary and unavailable; Pretendard is the
+   industry-standard Korean+Latin sans used as its drop-in replacement
+   (same metrics family as Apple SD Gothic Neo). Swap these files if the
+   licensed Toss Product Sans webfonts become available. */
+
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/PretendardVariable.ttf") format("truetype-variations");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/Pretendard-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/Pretendard-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/Pretendard-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/Pretendard-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/Pretendard-Bold.ttf") format("truetype");
+}

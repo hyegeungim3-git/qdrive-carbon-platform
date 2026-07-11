@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대구 시내버스 탄소 리포트 — 시민 대시보드</title>
+<meta name="description" content="대구 시내버스 412대가 안전운전으로 만든 탄소 감축 성과를 시민에게 공개하는 페이지">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2303b26c'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/base.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/styles.css">
+  <script src="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--surface);-webkit-font-smoothing:antialiased;color:var(--text-strong);}
+    a{color:var(--link);text-decoration:none;}
+    @keyframes ecoFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+    @keyframes livePulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+    .pub-section{animation:ecoFade .4s ease;}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;min-height:100dvh;">
+
+  <!-- ============ HERO (공개 페이지) ============ -->
+  <div class="pub-section" style="background:linear-gradient(160deg,#0b2b18 0%,#0e4a26 55%,#0a5c2e 100%);color:#fff;padding:44px 24px 88px;">
+    <div style="max-width:1040px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7ee2a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+          </div>
+          <span style="font-size:15px;font-weight:700;letter-spacing:-0.2px;">대구광역시 × QDrive</span>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.12);padding:7px 13px;border-radius:9999px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#7ee2a8;animation:livePulse 1.6s infinite;"></span>
+          실시간 집계 중 · 2026.07.11
+        </span>
+      </div>
+
+      <div style="text-align:center;margin-top:52px;">
+        <div style="font-size:16px;font-weight:700;color:#a7d9bd;">오늘, 대구 시내버스 412대가 아낀 탄소</div>
+        <div style="font-size:76px;font-weight:700;letter-spacing:-3px;line-height:1.1;margin-top:10px;font-variant-numeric:tabular-nums;">2.1<span style="font-size:30px;font-weight:700;letter-spacing:-0.5px;margin-left:6px;color:#a7d9bd;">tCO₂</span></div>
+        <div style="font-size:15px;font-weight:600;color:#cfe9db;margin-top:14px;line-height:1.6;">기사님들의 안전운전이 연료 784L를 아꼈어요.<br>과속·급가속이 줄면, 도시의 공기가 달라져요.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:760px;margin:44px auto 0;">
+        <div style="background:rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;backdrop-filter:blur(4px);">
+          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;">72.6t</div>
+          <div style="font-size:12px;font-weight:600;color:#a7d9bd;margin-top:4px;">이번 달 CO₂ 감축</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;backdrop-filter:blur(4px);">
+          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;">393.7t</div>
+          <div style="font-size:12px;font-weight:600;color:#a7d9bd;margin-top:4px;">올해 누적 감축</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;backdrop-filter:blur(4px);">
+          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;">59,600그루</div>
+          <div style="font-size:12px;font-weight:600;color:#a7d9bd;margin-top:4px;">소나무 연간 흡수량 환산</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BODY ============ -->
+  <div style="max-width:1040px;margin:-48px auto 0;padding:0 24px 40px;">
+
+    <!-- 월별 추이 + 함께한 사람들 -->
+    <div class="pub-section" style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;">
+      <div style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+        <div style="font-size:17px;font-weight:700;">매달 조금씩, 꾸준히 줄고 있어요</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:4px;">월별 CO₂ 감축량 (도입 전 대비 실측)</div>
+        <div style="position:relative;height:240px;margin-top:16px;"><canvas id="p-month"></canvas></div>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:14px;">
+        <div style="font-size:17px;font-weight:700;">함께 만든 사람들</div>
+        <div style="display:flex;flex-direction:column;gap:12px;flex:1;justify-content:center;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:13.5px;font-weight:600;color:var(--text-body);">참여 버스</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">412대</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:13.5px;font-weight:600;color:var(--text-body);">안전운전 기사님</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">486명</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:13.5px;font-weight:600;color:var(--text-body);">친환경 버스 (전기·CNG)</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">140대</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:13.5px;font-weight:600;color:var(--text-body);">에코 드라이빙 실천율</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">78%</span></div>
+        </div>
+        <div style="background:var(--grey-50);border-radius:12px;padding:13px 15px;font-size:12.5px;font-weight:600;color:var(--text-secondary);line-height:1.6;">버스는 승용차보다 1인당 CO₂ 배출이 약 1/7이에요. 버스를 타는 것만으로도 감축에 동참하는 거예요.</div>
+      </div>
+    </div>
+
+    <!-- 내 노선 조회 -->
+    <div class="pub-section" style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="font-size:17px;font-weight:700;">내가 타는 버스는 얼마나 친환경일까요?</div>
+        <span style="font-size:12px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:4px 10px;border-radius:9999px;">노선별 효율 등급</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+        <sc-for list="{{ routeChips }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;background:var(--grey-50);border-radius:14px;padding:20px 22px;margin-top:14px;">
+        <div style="{{ gradeStyle }}">{{ gradeLetter }}</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;">{{ routeName }} <span style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-left:4px;">{{ routeSeg }}</span></div>
+          <div style="font-size:13.5px;font-weight:600;color:var(--text-body);margin-top:6px;line-height:1.6;">{{ routeDesc }}</div>
+          <div style="display:flex;gap:18px;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--text-secondary);flex-wrap:wrap;">
+            <span>km당 CO₂ <b style="color:var(--text-strong);">{{ routeCo2 }}</b></span>
+            <span>하루 수송 <b style="color:var(--text-strong);">{{ routePax }}</b></span>
+            <span>이번 달 감축 기여 <b style="color:#03965c;">{{ routeSave }}</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div class="pub-section" style="margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:11.5px;font-weight:500;color:var(--text-placeholder);line-height:1.6;">산정 기준 — 도입 전 12개월 연비 베이스라인 대비 실측 (OBD·DTG 교차 검증) · 배출계수 환경부 고시 · 소나무 환산 6.6kgCO₂/그루·년</span>
+      <a href="탄소중립 대시보드.dc.html" style="font-size:11.5px;font-weight:600;color:var(--text-placeholder);flex:none;">© 대구광역시 · QDrive (관제 데모)</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { route: 0 };
+
+  routes() {
+    return [
+      { name: "급행1", seg: "동대구역 ↔ 서부정류장", grade: "A", co2: "0.84kg", pax: "18,420명", save: "3.9 tCO₂",
+        desc: "대구에서 가장 친환경적인 노선이에요. 기사님들의 예측 감속 실천율이 91%로 가장 높아요." },
+      { name: "간선 401", seg: "반월당 ↔ 칠곡경대병원", grade: "A", co2: "0.92kg", pax: "14,260명", save: "3.2 tCO₂",
+        desc: "전기버스 비중이 높아 배출이 적은 노선이에요. 조용하고 매연 없는 승차감을 느껴보세요." },
+      { name: "간선 649", seg: "성서공단 ↔ 대구역", grade: "B", co2: "1.03kg", pax: "11,830명", save: "2.7 tCO₂",
+        desc: "평균 수준의 효율을 내는 노선이에요. 공회전 줄이기 코칭으로 계속 좋아지고 있어요." },
+      { name: "순환 2-1", seg: "범어네거리 순환", grade: "B", co2: "1.12kg", pax: "7,940명", save: "1.9 tCO₂",
+        desc: "짧은 정류장 간격에도 부드러운 가감속으로 효율을 지키고 있는 노선이에요." },
+      { name: "지선 356", seg: "두류역 ↔ 시지지구", grade: "C", co2: "1.28kg", pax: "5,210명", save: "1.6 tCO₂",
+        desc: "언덕 구간이 많아 배출이 높은 편이에요. 전기버스 우선 투입 검토 대상이에요." },
+      { name: "급행5", seg: "대구공항 ↔ 계명대", grade: "C", co2: "1.34kg", pax: "4,080명", save: "1.4 tCO₂",
+        desc: "장거리 고속 구간 노선이에요. 정속 주행 코칭을 집중 적용하고 있어요." },
+    ];
+  }
+
+  renderVals() {
+    const routes = this.routes();
+    const sel = routes[this.state.route];
+    const gradeColor = { A: "#03b26c", B: "#3182f6", C: "#fe9800" }[sel.grade];
+    return {
+      routeChips: routes.map((r, i) => {
+        const active = i === this.state.route;
+        return { label: r.name, onClick: () => this.setState({ route: i }),
+          style: { appearance: "none", border: active ? "1px solid var(--primary)" : "1px solid var(--border)",
+            background: active ? "var(--primary-weak)" : "#fff", color: active ? "var(--primary)" : "var(--text-body)",
+            fontFamily: "inherit", fontSize: 13, fontWeight: 700, padding: "8px 15px", borderRadius: 9999, cursor: "pointer" } };
+      }),
+      routeName: sel.name, routeSeg: sel.seg, routeDesc: sel.desc,
+      routeCo2: sel.co2, routePax: sel.pax, routeSave: sel.save,
+      gradeLetter: sel.grade,
+      gradeStyle: { width: 72, height: 72, borderRadius: 20, flex: "none", display: "flex", alignItems: "center",
+        justifyContent: "center", fontSize: 34, fontWeight: 700, color: "#fff", background: gradeColor,
+        boxShadow: "0 6px 18px " + gradeColor + "55" },
+    };
+  }
+
+  componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
+  componentDidUpdate() { this._tick(); }
+  componentWillUnmount() { clearInterval(this._iv); if (this._chart) { try { this._chart.destroy(); } catch (e) {} } }
+
+  _tick() {
+    const C = window.Chart;
+    if (!C) return;
+    const el = document.getElementById("p-month");
+    if (!el || C.getChart("p-month")) return;
+    C.defaults.font.family = "Pretendard Variable, Pretendard, sans-serif";
+    C.defaults.font.weight = 600;
+    C.defaults.color = "#8b95a1";
+    this._chart = new C(el, { type: "bar",
+      data: { labels: ["2월", "3월", "4월", "5월", "6월", "7월"],
+        datasets: [{ data: [57.4, 61.1, 64.6, 67.5, 70.5, 72.6], backgroundColor: "#03b26c", borderRadius: 9, barPercentage: .55 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+        scales: { y: { grid: { color: "#f2f4f6" }, ticks: { callback: v => v + "t" } }, x: { grid: { display: false } } } } });
+  }
+}
+</script>
+</body>
+</html>

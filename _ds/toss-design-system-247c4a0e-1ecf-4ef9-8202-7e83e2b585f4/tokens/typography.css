@@ -1,0 +1,35 @@
+/* ============================================================
+   TYPOGRAPHY — Toss Product Sans (subbed by Pretendard).
+   8 weights ship; the UI uses 400 / 600 / 700 with restraint.
+   Financial amounts use 700 + tabular numerals.
+   ============================================================ */
+
+:root {
+  /* ---- Families ---- */
+  --font-sans: "Pretendard Variable", "Pretendard", "SF Pro KR",
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Noto Sans KR", Roboto, sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---- Weights ---- */
+  --weight-light:    300;
+  --weight-regular:  400;  /* body */
+  --weight-medium:   500;  /* tab labels, toasts */
+  --weight-semibold: 600;  /* emphasis, subtitles */
+  --weight-bold:     700;  /* headings, financial amounts */
+
+  /* ---- Type scale: size / line-height ---- */
+  --display-hero-size: 30px;  --display-hero-lh: 40px;  /* splash, hero */
+  --display-lg-size:   26px;  --display-lg-lh:   36px;  /* section headers, key metrics */
+  --heading-lg-size:   22px;  --heading-lg-lh:   30px;  /* feature titles, modal headers */
+  --heading-size:      20px;  --heading-lh:      28px;  /* card headings */
+  --subtitle-size:     16px;  --subtitle-lh:     24px;  /* nav titles, list headers */
+  --body-lg-size:      16px;  --body-lg-lh:      24px;  /* descriptions */
+  --body-size:         14px;  --body-lh:         22px;  /* standard reading */
+  --body-sm-size:      13px;  --body-sm-lh:      20px;  /* secondary info */
+  --caption-size:      12px;  --caption-lh:      18px;  /* timestamps, fine print */
+
+  /* ---- Numeral feature settings ---- */
+  --nums-tabular:    "tnum" 1;  /* @kind other */ /* fixed-width — financial tables */
+  --nums-proportional: "pnum" 1; /* @kind other */ /* variable-width — display */
+}

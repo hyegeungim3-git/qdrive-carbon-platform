@@ -1,0 +1,32 @@
+/* ============================================================
+   SPACING, RADIUS & ELEVATION
+   Base unit 8px. Horizontal page padding is 20px (wider than
+   typical) — "breathing room for money".
+   ============================================================ */
+
+:root {
+  /* ---- Spacing scale ---- */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   12px;
+  --space-base: 16px;
+  --space-5:    20px;   /* standard horizontal page padding */
+  --space-lg:   24px;
+  --space-xl:   32px;
+  --space-2xl:  40px;
+  --space-3xl:  48px;
+
+  /* ---- Border radius ---- */
+  --radius-sm:   4px;    /* small badges, inline */
+  --radius-md:   8px;    /* inputs, small buttons, compact cards, toasts */
+  --radius-lg:   12px;   /* standard cards, dialog corners */
+  --radius-xl:   16px;   /* featured cards, sheets, xlarge buttons */
+  --radius-full: 9999px; /* toggles, pills, chips */
+
+  /* ---- Elevation (single-layer, pure-black, low-opacity) ---- */
+  --shadow-subtle:   0px 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-standard: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-elevated: 0px 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-modal:    0px 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-sheet:    0px -4px 12px rgba(0, 0, 0, 0.08);
+}
