@@ -129,6 +129,10 @@
         <div style="font-size:11.5px;color:var(--text-secondary);font-weight:500;">{{ pageSub }}</div>
       </div>
       <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <span style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:9999px;background:rgba(3,178,108,0.1);color:var(--success);font-size:12px;font-weight:700;white-space:nowrap;">
+          <span style="width:7px;height:7px;border-radius:50%;background:var(--success);animation:livePulse 1.6s infinite;"></span>
+          OBD·DTG 수신 중 · 356대
+        </span>
         <div style="display:inline-flex;background:var(--grey-100);border-radius:10px;padding:4px;gap:2px;">
           <sc-for list="{{ periodChips }}" as="p" hint-placeholder-count="3">
             <button onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</button>

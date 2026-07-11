@@ -2,6 +2,8 @@
 
 대구 시내버스 412대의 OBD·DTG 데이터로 안전운전 → 연료 절감 → 탄소 감축을 관리하는 UI 프로토타입.
 
+**기획 정본은 [기획서.md](기획서.md)** — 수치를 바꿀 때는 그 문서의 §4 정합 사전을 먼저 갱신할 것. 랜딩(index.html)은 제품 스토리 + 권장 시연 동선 5단계를 담은 데모 브리핑 페이지다.
+
 ## 아키텍처
 
 - **`.dc.html` 포맷**: `<x-dc>` 안의 HTML 템플릿(`{{ }}` 플레이스홀더, `<sc-if>`/`<sc-for>` 제어 태그) + `<script data-dc-script>`의 `class Component extends DCLogic` 로직을 `support.js` 런타임이 React로 렌더링한다.

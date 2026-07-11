@@ -4,68 +4,252 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QDrive — AI 기반 탄소중립 운영 플랫폼 (데모)</title>
-<meta name="description" content="대구 시내버스 OBD·DTG 데이터 기반 안전운전→연료 절감→탄소 감축 플랫폼 프로토타입 — 4개 이해관계자 화면 데모">
+<meta name="description" content="대구 시내버스 412대의 OBD·DTG 데이터로 안전운전→연료 절감→탄소 감축을 만드는 플랫폼 프로토타입 — 4개 이해관계자 화면 라이브 데모">
 <meta property="og:type" content="website">
 <meta property="og:title" content="QDrive — AI 기반 탄소중립 운영 플랫폼 (데모)">
-<meta property="og:description" content="대구 시내버스 412대의 OBD·DTG 데이터로 안전운전→연료 절감→탄소 감축. 관제·기사·경영진·시민 4개 화면 라이브 데모.">
+<meta property="og:description" content="안전운전이 곧 탄소중립입니다 — 연비 +4.5%, 연 393.7tCO₂ 감축. 관제·기사·경영진·시민 4개 화면 라이브 데모.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/fonts.css">
 <style>
+  /* ===== 토큰 (이 페이지 전용 — 다크 히어로 + 라이트 본문) ===== */
+  :root{
+    --brand:#3182f6; --brand-strong:#1b64da; --eco:#03b26c; --eco-deep:#03965c;
+    --ink:#191f28; --ink-2:#4e5968; --ink-3:#8b95a1;
+    --bg:#f2f4f6; --card:#ffffff; --line:#e5e8eb;
+    --hero-bg:#101623; --hero-card:rgba(255,255,255,0.06); --hero-line:rgba(255,255,255,0.12);
+    --hero-ink:#f9fafb; --hero-ink-2:#b0b8c1; --hero-eco:#5ad598;
+    --r-el:10px; --r-card:16px; --r-hero:24px;
+    --sh-card:0 2px 10px rgba(0,0,0,.05); --sh-lift:0 10px 28px rgba(0,0,0,.10);
+  }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#f2f4f6;color:#191f28;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
-  .wrap{max-width:880px;width:100%;}
-  .logo{display:flex;align-items:center;gap:12px;justify-content:center;}
-  .logo-box{width:44px;height:44px;border-radius:13px;background:#3182f6;display:flex;align-items:center;justify-content:center;}
-  h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;text-align:center;margin-top:18px;}
-  .sub{font-size:14.5px;font-weight:500;color:#6b7684;text-align:center;margin-top:10px;line-height:1.65;}
-  .flow{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:12.5px;font-weight:700;color:#3182f6;flex-wrap:wrap;}
-  .flow span{background:rgba(49,130,246,0.08);padding:5px 12px;border-radius:9999px;}
-  .flow em{color:#b0b8c1;font-style:normal;}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:34px;}
-  @media (max-width:640px){.grid{grid-template-columns:1fr;}}
-  a.card{display:block;background:#fff;border-radius:16px;padding:22px 24px;text-decoration:none;color:inherit;box-shadow:0 2px 10px rgba(0,0,0,0.05);border:1px solid #eceef0;transition:transform .15s,box-shadow .15s;}
-  a.card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,0.09);}
-  .tag{display:inline-block;font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px;margin-bottom:11px;}
-  .t-blue{background:rgba(49,130,246,0.1);color:#1b64da;}
-  .t-green{background:rgba(3,178,108,0.1);color:#03965c;}
-  .t-dark{background:#191f28;color:#7ee2a8;}
-  .t-orange{background:rgba(254,152,0,0.12);color:#c47600;}
-  .card h2{font-size:16.5px;font-weight:700;letter-spacing:-0.2px;}
-  .card p{font-size:13px;font-weight:500;color:#6b7684;margin-top:7px;line-height:1.6;}
-  .foot{text-align:center;font-size:11.5px;font-weight:500;color:#8b95a1;margin-top:30px;line-height:1.7;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;word-break:keep-all;}
+  a{text-decoration:none;color:inherit;}
+  button,a{transition:filter .15s ease, transform .15s ease, box-shadow .15s ease;}
+  a:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:6px;}
+  .wrap{max-width:1024px;margin:0 auto;padding:0 24px;}
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  section{animation:rise .5s ease both;}
+
+  /* ===== 히어로 ===== */
+  .hero{background:linear-gradient(165deg,#0d1b2e 0%,#101623 46%,#0c2418 100%);color:var(--hero-ink);padding:64px 0 72px;}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .logo{display:flex;align-items:center;gap:11px;}
+  .logo-box{width:38px;height:38px;border-radius:11px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex:none;}
+  .logo-name{font-size:16px;font-weight:800;letter-spacing:-.2px;}
+  .logo-sub{font-size:11px;font-weight:600;color:var(--hero-ink-2);margin-top:1px;}
+  .badge-live{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;background:var(--hero-card);border:1px solid var(--hero-line);padding:8px 14px;border-radius:9999px;}
+  .badge-live i{width:7px;height:7px;border-radius:50%;background:var(--hero-eco);animation:pulse 1.6s infinite;}
+  .hero-body{text-align:center;margin-top:58px;}
+  .hero-kicker{display:inline-block;font-size:12.5px;font-weight:700;color:var(--hero-eco);background:rgba(3,178,108,.14);border:1px solid rgba(3,178,108,.3);padding:7px 14px;border-radius:9999px;letter-spacing:.2px;}
+  h1{font-size:44px;font-weight:800;letter-spacing:-1.2px;line-height:1.22;margin-top:20px;}
+  h1 em{font-style:normal;color:var(--hero-eco);}
+  .hero-sub{font-size:16px;font-weight:500;color:var(--hero-ink-2);margin-top:16px;line-height:1.7;}
+  .hero-cta{display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 22px;border-radius:12px;font-size:14.5px;font-weight:700;}
+  .btn-primary{background:var(--brand);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 8px 20px rgba(49,130,246,.35);}
+  .btn-ghost{background:var(--hero-card);border:1px solid var(--hero-line);color:var(--hero-ink);}
+  .btn-ghost:hover{filter:brightness(1.25);}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:880px;margin:52px auto 0;}
+  .kpi{background:var(--hero-card);border:1px solid var(--hero-line);border-radius:var(--r-card);padding:18px 16px;text-align:center;backdrop-filter:blur(4px);}
+  .kpi b{display:block;font-size:26px;font-weight:800;letter-spacing:-.6px;font-variant-numeric:tabular-nums;}
+  .kpi b.eco{color:var(--hero-eco);}
+  .kpi span{display:block;font-size:12px;font-weight:600;color:var(--hero-ink-2);margin-top:5px;}
+  .hero-note{text-align:center;font-size:11.5px;font-weight:500;color:#6b7684;margin-top:22px;}
+
+  /* ===== 섹션 공통 ===== */
+  .sect{padding:64px 0 8px;}
+  .sect-kicker{font-size:12.5px;font-weight:800;color:var(--brand);letter-spacing:1px;}
+  .sect h2{font-size:27px;font-weight:800;letter-spacing:-.6px;margin-top:8px;}
+  .sect-sub{font-size:14.5px;font-weight:500;color:var(--ink-2);margin-top:8px;line-height:1.65;}
+
+  /* ===== 작동 원리 ===== */
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
+  .how-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px 22px;box-shadow:var(--sh-card);}
+  .how-num{position:absolute;top:20px;right:20px;font-size:32px;font-weight:800;color:var(--bg);letter-spacing:-1px;}
+  .how-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+  .how-card h3{font-size:16.5px;font-weight:700;letter-spacing:-.2px;}
+  .how-card p{font-size:13.5px;font-weight:500;color:var(--ink-2);margin-top:8px;line-height:1.65;}
+  .how-card p b{color:var(--ink);font-weight:700;}
+
+  /* ===== 화면 카드 ===== */
+  .screens{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px;}
+  .scr{display:block;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px;box-shadow:var(--sh-card);}
+  .scr:hover{transform:translateY(-3px);box-shadow:var(--sh-lift);}
+  .scr-tag{display:inline-flex;font-size:11px;font-weight:700;padding:5px 11px;border-radius:9999px;margin-bottom:13px;}
+  .t-blue{background:rgba(49,130,246,.1);color:var(--brand-strong);}
+  .t-green{background:rgba(3,178,108,.1);color:var(--eco-deep);}
+  .t-dark{background:var(--ink);color:var(--hero-eco);}
+  .t-orange{background:rgba(254,152,0,.13);color:#c47600;}
+  .scr h3{font-size:17.5px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
+  .scr h3 svg{color:var(--ink-3);flex:none;}
+  .scr p{font-size:13.5px;font-weight:500;color:var(--ink-2);margin-top:8px;line-height:1.62;}
+  .scr-demo{display:flex;align-items:flex-start;gap:7px;margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--eco-deep);line-height:1.55;}
+  .scr-demo svg{flex:none;margin-top:2px;}
+
+  /* ===== 시연 동선 ===== */
+  .flow{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-card);margin-top:28px;padding:10px 26px;}
+  .step{display:flex;gap:16px;padding:17px 0;border-bottom:1px solid var(--line);}
+  .step:last-child{border-bottom:none;}
+  .step-n{width:28px;height:28px;flex:none;border-radius:9px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;}
+  .step-body b{font-size:14.5px;font-weight:700;letter-spacing:-.2px;}
+  .step-body p{font-size:13px;font-weight:500;color:var(--ink-2);margin-top:3px;line-height:1.6;}
+  .step-body a{color:var(--brand-strong);font-weight:700;}
+  .step-body a:hover{text-decoration:underline;}
+
+  /* ===== 푸터 ===== */
+  .foot{padding:48px 0 44px;text-align:center;}
+  .foot-basis{font-size:12px;font-weight:500;color:var(--ink-3);line-height:1.8;max-width:720px;margin:0 auto;}
+  .foot-links{margin-top:16px;font-size:12.5px;font-weight:600;color:var(--ink-3);}
+  .foot-links a{color:var(--ink-2);}
+  .foot-links a:hover{color:var(--brand);}
+
+  /* ===== 반응형 ===== */
+  @media (max-width:860px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .how{grid-template-columns:1fr;}
+    .screens{grid-template-columns:1fr;}
+    h1{font-size:33px;}
+  }
+  @media (max-width:520px){
+    .hero{padding:44px 0 52px;}
+    .hero-body{margin-top:40px;}
+    h1{font-size:27px;letter-spacing:-.8px;}
+    .hero-sub{font-size:14px;}
+    .kpis{grid-template-columns:1fr 1fr;gap:10px;margin-top:36px;}
+    .kpi b{font-size:21px;}
+    .sect{padding:48px 0 8px;}
+    .sect h2{font-size:22px;}
+    .btn{height:46px;padding:0 18px;font-size:13.5px;}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="logo"><div class="logo-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div></div>
-  <h1>QDrive — AI 기반 탄소중립 운영 플랫폼</h1>
-  <p class="sub">대구 시내버스 412대의 OBD·DTG 데이터로<br>안전운전 → 연료 절감 → 탄소 감축을 만드는 플랫폼 프로토타입입니다.</p>
-  <div class="flow"><span>관제센터</span><em>→</em><span>기사</span><em>→</em><span>운수사 경영진</span><em>→</em><span>시민</span></div>
 
-  <div class="grid">
-    <a class="card" href="탄소중립 대시보드.dc.html">
-      <span class="tag t-blue">관제센터 · 웹</span>
-      <h2>탄소중립 관제 대시보드</h2>
-      <p>실시간 지도·히트맵, 탄소·연료·안전운행 대시보드, 차량·운전자·노선 관리, 전기버스 전환 시뮬레이터(AI Planning), 보고서 자동 생성(Reports)</p>
-    </a>
-    <a class="card" href="QDrive 기사앱.dc.html">
-      <span class="tag t-orange">기사 · 8″ 태블릿</span>
-      <h2>QDrive 기사앱</h2>
-      <p>내비형 실시간 AI 코칭(위험 구간·간격·공회전), 운행 리포트, 사내 주간 랭킹과 배지 게이미피케이션</p>
-    </a>
-    <a class="card" href="운수사 경영 대시보드.dc.html">
-      <span class="tag t-dark">운수사 경영진</span>
-      <h2>세운버스(주) 경영 리포트</h2>
-      <p>안전운전이 만든 월 손익 효과(연료비·예지정비·인센티브), 5개사 벤치마크, 전기 전환 투자 검토, AI 경영 인사이트</p>
-    </a>
-    <a class="card" href="시민 탄소 대시보드.dc.html">
-      <span class="tag t-green">시민 · 공개</span>
-      <h2>시민 탄소 대시보드</h2>
-      <p>오늘 아낀 탄소 카운터, 소나무 환산, 월별 감축 추이, 내 노선의 친환경 등급 조회</p>
-    </a>
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <div class="logo">
+        <div class="logo-box"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div>
+        <div>
+          <div class="logo-name">QDrive</div>
+          <div class="logo-sub">AI 기반 탄소중립 운영 플랫폼</div>
+        </div>
+      </div>
+      <span class="badge-live"><i></i>라이브 데모 · 대구 시내버스 412대 목업</span>
+    </div>
+
+    <div class="hero-body">
+      <span class="hero-kicker">대구광역시 시내버스 실증 시나리오</span>
+      <h1>안전운전이 곧<br><em>탄소중립</em>입니다</h1>
+      <p class="hero-sub">버스에 이미 달려 있는 OBD·DTG 단말의 데이터만으로<br>급가속을 줄이고, 연료를 아끼고, 감축 실적을 만드는 운영 플랫폼입니다.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="탄소중립 대시보드.dc.html">관제 데모 시작하기
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+        <a class="btn btn-ghost" href="#screens">4개 화면 둘러보기</a>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><b class="eco">+4.5%</b><span>연비 개선 (경유, 실측)</span></div>
+        <div class="kpi"><b class="eco">393.7t</b><span>연 누적 CO₂ 감축</span></div>
+        <div class="kpi"><b>-28%</b><span>위험운전 이벤트</span></div>
+        <div class="kpi"><b>+1,175만원</b><span>운수사 월 순효과 (세운버스)</span></div>
+      </div>
+      <p class="hero-note">모든 수치는 데모용 목업 — 에코드라이빙 실증 문헌 범위(연비 3~7% 개선) 안에서 상호 정합하게 설계</p>
+    </div>
   </div>
+</header>
 
-  <p class="foot">모든 데이터는 데모용 목업입니다 · 절감량은 도입 전 12개월 연비 베이스라인 대비 실측 기준으로 설계 · 배출계수 환경부 고시<br>지도 타일(CARTO)·차트(Chart.js)·지도(Leaflet)는 CDN 로드 — 인터넷 연결 필요</p>
-</div>
+<!-- ================= 작동 원리 ================= -->
+<section class="sect">
+  <div class="wrap">
+    <div class="sect-kicker">HOW IT WORKS</div>
+    <h2>새 장비 없이, 데이터 3단계로</h2>
+    <p class="sect-sub">전국 사업용 차량에 이미 의무 장착된 단말을 그대로 씁니다 — 도입 장벽이 낮은 이유입니다.</p>
+    <div class="how">
+      <div class="how-card">
+        <span class="how-num">01</span>
+        <div class="how-ic" style="background:rgba(49,130,246,.1);color:var(--brand);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
+        <h3>수집 — 이미 있는 단말</h3>
+        <p><b>OBD 연료분사량 × DTG 주행기록</b>을 교차 검증해 차량 412대의 연비·운전행동을 초 단위로 수집합니다. 신규 하드웨어 투자 0원.</p>
+      </div>
+      <div class="how-card">
+        <span class="how-num">02</span>
+        <div class="how-ic" style="background:rgba(49,130,246,.1);color:var(--brand);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M12 22v-2M17 20.66l-1-1.73M11 10.27 7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2"/></svg></div>
+        <h3>AI 분석 — 사람을 움직이는 코칭</h3>
+        <p>기사에게는 <b>내비형 실시간 코칭</b>, 관제에는 <b>예지정비·이상 탐지</b>, 경영진에게는 <b>전기버스 전환 시뮬레이션</b>. 데이터가 행동으로 바뀝니다.</p>
+      </div>
+      <div class="how-card">
+        <span class="how-num">03</span>
+        <div class="how-ic" style="background:rgba(3,178,108,.1);color:var(--eco);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div>
+        <h3>검증 — 돈이 되는 감축</h3>
+        <p>도입 전 12개월 베이스라인 대비 <b>실측 절감</b>만 인정합니다. 지자체 보고서 자동 생성, 온실가스 외부사업(KOC) 크레딧 수익화까지.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 화면 ================= -->
+<section class="sect" id="screens">
+  <div class="wrap">
+    <div class="sect-kicker">LIVE DEMO</div>
+    <h2>4개 이해관계자, 4개 화면</h2>
+    <p class="sect-sub">같은 데이터가 보는 사람에 따라 다른 언어로 번역됩니다 — 관제는 운영으로, 기사는 코칭으로, 경영진은 손익으로, 시민은 자부심으로.</p>
+    <div class="screens">
+      <a class="scr" href="탄소중립 대시보드.dc.html">
+        <span class="scr-tag t-blue">관제센터 · 웹</span>
+        <h3>탄소중립 관제 대시보드 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></h3>
+        <p>실시간 지도·급가감속 히트맵, 탄소·연료·안전운행 대시보드, 차량·운전자·노선 관리, AI Planning과 Reports까지 8개 페이지.</p>
+        <div class="scr-demo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>시연 포인트 — 우상단 일간/월간/연간 토글, AI Planning의 전환 대수 슬라이더</div>
+      </a>
+      <a class="scr" href="QDrive 기사앱.dc.html">
+        <span class="scr-tag t-orange">기사 · 8″ 태블릿</span>
+        <h3>QDrive 기사앱 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></h3>
+        <p>내비형 실시간 코칭 — 위험 구간 예고, 앞뒤차 간격, 공회전 알림. 운행 리포트와 사내 랭킹·배지로 참여를 만드는 게이미피케이션.</p>
+        <div class="scr-demo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>시연 포인트 — 살아 움직이는 속도계, 리포트 탭의 랭킹·배지</div>
+      </a>
+      <a class="scr" href="운수사 경영 대시보드.dc.html">
+        <span class="scr-tag t-dark">운수회사 경영진</span>
+        <h3>세운버스(주) 경영 리포트 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></h3>
+        <p>연료비 + 예지정비 − 인센티브 = 월 순효과를 한 식으로. 5개사 벤치마크, 전기 전환 투자 검토, 보험료 협상 카드까지 경영의 언어로.</p>
+        <div class="scr-demo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>시연 포인트 — 손익 수식 리본, 인센티브 1원당 절감 3.4원</div>
+      </a>
+      <a class="scr" href="시민 탄소 대시보드.dc.html">
+        <span class="scr-tag t-green">시민 · 공개 (모바일 대응)</span>
+        <h3>시민 탄소 대시보드 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></h3>
+        <p>오늘 아낀 탄소 카운터, 소나무 59,600그루 환산, 월별 추이. "내가 타는 버스는 얼마나 친환경일까?" 노선 등급 조회.</p>
+        <div class="scr-demo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>시연 포인트 — 노선 칩을 눌러 등급 A/B/C 전환, 폰으로 열어보기</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 시연 동선 ================= -->
+<section class="sect">
+  <div class="wrap">
+    <div class="sect-kicker">DEMO SCRIPT</div>
+    <h2>권장 시연 동선 — 5분</h2>
+    <p class="sect-sub">발표 흐름 그대로: 문제 → 실시간 → 성과 → 투자 → 확산.</p>
+    <div class="flow">
+      <div class="step"><span class="step-n">1</span><div class="step-body"><b>통합 운영 — "지금 어디서 새는가"</b><p><a href="탄소중립 대시보드.dc.html">관제 대시보드</a>의 실시간 지도에서 움직이는 차량과 급가감속 히트맵(반월당 붉은 구간)을 보여줍니다.</p></div></div>
+      <div class="step"><span class="step-n">2</span><div class="step-body"><b>기사앱 — "현장에서 어떻게 바꾸는가"</b><p><a href="QDrive 기사앱.dc.html">기사앱</a>에서 반월당 진입 전 감속 코칭을 보여주고, 랭킹·배지로 자발적 참여를 설명합니다.</p></div></div>
+      <div class="step"><span class="step-n">3</span><div class="step-body"><b>탄소·연료 — "얼마나 아꼈는가"</b><p>기간 토글을 일간→월간→연간으로 넘기며 절감이 누적되는 구조와 안전점수↔연비 상관(r=0.81)을 짚습니다.</p></div></div>
+      <div class="step"><span class="step-n">4</span><div class="step-body"><b>AI Planning + 경영 리포트 — "다음 투자는 어디인가"</b><p>전환 슬라이더를 6→24대로 밀며 한계효과 곡선을 보여주고, <a href="운수사 경영 대시보드.dc.html">경영 리포트</a>의 월 순효과 +1,175만원으로 연결합니다.</p></div></div>
+      <div class="step"><span class="step-n">5</span><div class="step-body"><b>시민 대시보드 — "도시의 자부심으로"</b><p><a href="시민 탄소 대시보드.dc.html">공개 페이지</a>를 폰으로 열어 소나무 환산과 노선 등급 조회로 마무리합니다.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="foot">
+  <div class="wrap">
+    <p class="foot-basis">산정 기준 — 절감량은 도입 전 12개월 노선별 연비 베이스라인 대비 실측 개선분 · 연료량 OBD × 주행거리 DTG 교차 검증 · 배출계수 경유 2.68 kgCO₂/L, CNG 2.22 kgCO₂/㎥, 전력 0.4594 kgCO₂/kWh (환경부 고시) · 안전운전 효과는 실증 범위 3~7% 내 관리 · 소나무 환산 6.6 kgCO₂/그루·년 · 지도 CARTO, 차트 Chart.js — 인터넷 연결 필요</p>
+    <p class="foot-links">© 대구광역시 × QDrive 데모 · <a href="https://github.com/hyegeungim3-git/qdrive-carbon-platform">GitHub 저장소</a> · <a href="https://github.com/hyegeungim3-git/qdrive-carbon-platform/blob/master/기획서.md">기획 정본 문서</a></p>
+  </div>
+</footer>
+
 </body>
 </html>
