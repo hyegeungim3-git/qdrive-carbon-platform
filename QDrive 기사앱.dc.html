@@ -31,6 +31,10 @@
     @keyframes ecoFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
     @keyframes livePulse{0%,100%{opacity:1;}50%{opacity:.35;}}
     .app-page{animation:ecoFade .3s ease;}
+    button{transition:filter .15s ease;}
+    button:hover{filter:brightness(0.96);}
+    button:active{filter:brightness(0.92);}
+    button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
   </style>
 </helmet>
 
@@ -91,7 +95,7 @@
               <div style="background:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);text-align:center;">
                 <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
                   <div>
-                    <div style="font-size:64px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;color:var(--text-strong);">54</div>
+                    <div style="font-size:64px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;color:var(--text-strong);">{{ speed }}</div>
                     <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;">km/h</div>
                   </div>
                   <span style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;border:4px solid var(--red-500);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;flex:none;">60</span>
@@ -316,7 +320,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { tab: "home" };
+  state = { tab: "home", speed: 54 };
 
   tabStyle(t) {
     const active = this.state.tab === t;
@@ -383,6 +387,7 @@ class Component extends DCLogic {
     ].map(p => ({ ...p, tagStyle: this.badge(p.c) }));
 
     return {
+      speed: this.state.speed,
       isHome: tab === "home", isReport: tab === "report",
       headerTitle: tab === "home" ? "운행 정보" : "내 운행 리포트",
       goHome: () => this.setState({ tab: "home" }),
@@ -392,17 +397,25 @@ class Component extends DCLogic {
     };
   }
 
-  componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
+  componentDidMount() {
+    this._iv = setInterval(() => this._tick(), 250); this._tick();
+    // 속도계 라이브 변동 (46~58km/h) — 정지 화면처럼 보이지 않게
+    this._spdIv = setInterval(() => {
+      const s = Math.max(46, Math.min(58, this.state.speed + Math.round(Math.random() * 6 - 3)));
+      if (s !== this.state.speed) this.setState({ speed: s });
+    }, 2200);
+  }
   componentDidUpdate() { this._tick(); }
-  componentWillUnmount() { clearInterval(this._iv); this._destroy(); if (this._map) { try { this._map.remove(); } catch (e) {} } }
+  componentWillUnmount() { clearInterval(this._iv); clearInterval(this._spdIv); this._destroy(); if (this._map) { try { this._map.remove(); } catch (e) {} } }
 
   _tickNavMap() {
     if (this.state.tab !== "home" || !window.L) return;
     const el = document.getElementById("nav-map");
-    if (!el) return;
+    if (!el || !el.clientWidth) return;
     if (this._map && this._map._container === el) return;
     if (this._map) { try { this._map.remove(); } catch (e) {} this._map = null; }
     const L = window.L;
+    if (el._leaflet_id) { delete el._leaflet_id; el.innerHTML = ""; }
     const map = L.map(el, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false });
     map.setView([35.8680, 128.5985], 15);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);

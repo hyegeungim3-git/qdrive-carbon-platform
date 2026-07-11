@@ -27,6 +27,10 @@
     a{color:var(--link);text-decoration:none;}
     @keyframes ecoFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
     .exec-section{animation:ecoFade .35s ease;}
+    button{transition:filter .15s ease;}
+    button:hover{filter:brightness(0.96);}
+    button:active{filter:brightness(0.92);}
+    button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
   </style>
 </helmet>
 

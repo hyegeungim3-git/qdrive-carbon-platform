@@ -36,6 +36,10 @@
     @keyframes ecoFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
     @keyframes livePulse{0%,100%{opacity:1;}50%{opacity:.35;}}
     .eco-page{animation:ecoFade .32s var(--ease-standard,ease);}
+    button{transition:filter .15s ease;}
+    button:hover{filter:brightness(0.96);}
+    button:active{filter:brightness(0.92);}
+    button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
   </style>
 </helmet>
 
@@ -1471,14 +1475,9 @@ class Component extends DCLogic {
     ].map(r => ({ ...r, badgeStyle: this.badge(r.c) }));
 
     return {
-      go1: () => this.setState({ dash: "1" }),
-      go2: () => this.setState({ dash: "2" }),
-      go3: () => this.setState({ dash: "3" }),
-      goV: () => this.setState({ dash: "V" }),
-      goD: () => this.setState({ dash: "D" }),
-      goR: () => this.setState({ dash: "R" }),
-      goP: () => this.setState({ dash: "P" }),
-      goT: () => this.setState({ dash: "T" }),
+      go1: this._go("1"), go2: this._go("2"), go3: this._go("3"),
+      goV: this._go("V"), goD: this._go("D"), goR: this._go("R"),
+      goP: this._go("P"), goT: this._go("T"),
       nav1: this.navStyle("1"), nav2: this.navStyle("2"), nav3: this.navStyle("3"),
       navV: this.navStyle("V"), navD: this.navStyle("D"), navR: this.navStyle("R"),
       navP: this.navStyle("P"), navT: this.navStyle("T"),
@@ -1526,9 +1525,21 @@ class Component extends DCLogic {
     };
   }
 
+  // 페이지 전환 — 통합 운영을 떠날 때는 컨테이너가 아직 문서에 있을 때 지도를 정리한다 (분리 후 remove()는 예외 유발)
+  _go(d) {
+    return () => {
+      if (d !== "1" && this._map) {
+        try { this._map.remove(); } catch (e) {}
+        this._map = null;
+        if (this._mapAnim) clearInterval(this._mapAnim);
+      }
+      this.setState({ dash: d, notif: false });
+    };
+  }
+
   componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
   componentDidUpdate() { this._tick(); }
-  componentWillUnmount() { clearInterval(this._iv); this._destroy(); }
+  componentWillUnmount() { clearInterval(this._iv); if (this._mapAnim) clearInterval(this._mapAnim); this._destroy(); }
 
   _canvasIds(dash) {
     return ({ "2": ["c-trend", "c-forecast", "c-system", "c-route", "c-fueltype", "c-corr"],
@@ -1556,10 +1567,13 @@ class Component extends DCLogic {
   _tickMap() {
     if (this.state.dash !== "1" || !window.L || !window.L.heatLayer) return;
     const el = document.getElementById("map-live");
-    if (!el) return;
+    // 레이아웃 확정 전(폭 0) 생성하면 heat 레이어가 IndexSizeError로 죽고 컨테이너가 초기화 실패 상태로 고착된다
+    if (!el || !el.clientWidth) return;
     if (this._map && this._map._container === el) return;
-    if (this._map) { try { this._map.remove(); } catch (e) {} this._map = null; }
+    if (this._map) { try { this._map.remove(); } catch (e) {} this._map = null; if (this._mapAnim) clearInterval(this._mapAnim); }
     const L = window.L;
+    // remove()가 예외로 중단되면 컨테이너에 _leaflet_id와 옛 DOM이 남아 L.map()이 영구 실패한다 — 강제 초기화
+    if (el._leaflet_id) { delete el._leaflet_id; el.innerHTML = ""; }
     const map = L.map(el, { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
     map.setView([35.8664, 128.5951], 13);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);
@@ -1580,8 +1594,10 @@ class Component extends DCLogic {
         pts.push([h.c[0] + (Math.random() - 0.5) * h.s, h.c[1] + (Math.random() - 0.5) * h.s * 1.4, h.w * (0.5 + Math.random() * 0.5)]);
       }
     });
-    L.heatLayer(pts, { radius: 26, blur: 20, maxZoom: 15, minOpacity: 0.25,
-      gradient: { 0.25: "#3182f6", 0.55: "#fe9800", 0.85: "#f04452" } }).addTo(map);
+    try {
+      L.heatLayer(pts, { radius: 26, blur: 20, maxZoom: 15, minOpacity: 0.25,
+        gradient: { 0.25: "#3182f6", 0.55: "#fe9800", 0.85: "#f04452" } }).addTo(map);
+    } catch (e) {}
 
     // 차량 마커
     const vh = [
@@ -1590,7 +1606,21 @@ class Component extends DCLogic {
       { p: [35.8930, 128.5850], c: "#f04452" }, { p: [35.8500, 128.6200], c: "#3182f6" },
       { p: [35.8850, 128.5600], c: "#fe9800" }, { p: [35.8560, 128.6420], c: "#03b26c" },
     ];
-    vh.forEach(v => L.circleMarker(v.p, { radius: 7, color: "#fff", weight: 2.5, fillColor: v.c, fillOpacity: 1 }).addTo(map));
+    // 차량 마커가 실제로 움직여야 '실시간 관제'로 읽힌다 — 경계 내 완만한 드리프트
+    const moving = vh.map(v => {
+      const m = L.circleMarker(v.p, { radius: 7, color: "#fff", weight: 2.5, fillColor: v.c, fillOpacity: 1 }).addTo(map);
+      m._vel = [(Math.random() - 0.5) * 0.0009, (Math.random() - 0.5) * 0.0013];
+      return m;
+    });
+    if (this._mapAnim) clearInterval(this._mapAnim);
+    this._mapAnim = setInterval(() => {
+      moving.forEach(m => {
+        const p = m.getLatLng();
+        if (p.lat < 35.845 || p.lat > 35.9) m._vel[0] *= -1;
+        if (p.lng < 128.55 || p.lng > 128.65) m._vel[1] *= -1;
+        m.setLatLng([p.lat + m._vel[0], p.lng + m._vel[1]]);
+      });
+    }, 450);
 
     // 주요 지점 라벨
     const pill = (name) => L.divIcon({ className: "", iconAnchor: [0, 11],
