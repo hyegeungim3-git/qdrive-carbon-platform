@@ -1004,6 +1004,29 @@
             </tbody>
           </table>
         </div>
+
+        <!-- 데이터 기반 정책 제안 -->
+        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="font-size:16px;font-weight:700;">데이터 기반 정책 제안</div>
+            <span style="font-size:11px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:3px 8px;border-radius:9999px;">버스 데이터로 도시가 좋아져요</span>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:14px;">412대가 도로 위에서 수집한 6개월 데이터가 교통 정책의 근거가 돼요 — 버스 회사만 좋아지는 게 아니라, 도시 전체가 좋아져요.</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            <sc-for list="{{ policyProps }}" as="p" hint-placeholder-count="3">
+              <div style="padding:15px 16px;border:1px solid var(--border);border-radius:12px;">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+                  <span style="{{ p.tagStyle }}">{{ p.tag }}</span>
+                  <span style="font-size:13.5px;font-weight:700;">{{ p.title }}</span>
+                </div>
+                <div style="font-size:12.5px;font-weight:600;color:var(--text-body);line-height:1.6;">{{ p.desc }}</div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid var(--divider);margin-top:10px;padding-top:8px;font-size:11.5px;font-weight:600;color:var(--text-secondary);">
+                  <span>근거 — {{ p.basis }}</span><span style="color:var(--blue-600);">{{ p.dept }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
       </div>
       </sc-if>
 
@@ -1087,6 +1110,53 @@
           </div>
         </div>
 
+        <!-- V2G 시뮬레이터 (미래 비전 H2 미리보기) -->
+        <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">
+            <span style="font-size:17px;font-weight:700;">V2G — 버스가 발전소가 되는 시간</span>
+            <span style="font-size:12px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,0.1);padding:4px 10px;border-radius:9999px;">미래 비전 H2 미리보기</span>
+          </div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-bottom:16px;">차고지에서 대기 중인 전기버스 배터리로 심야에 싸게 충전하고, 주간 피크 시간에 전력망으로 되팔아요 — DTG 운행 스케줄로 검증된 대기 시간만 사용해요.</div>
+          <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:12px;align-items:stretch;margin-bottom:16px;">
+            <div style="background:var(--grey-50);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:center;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">V2G 참여 전기버스</span>
+                <span style="font-size:24px;font-weight:700;color:#7c3aed;font-variant-numeric:tabular-nums;">{{ v2gN }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:1px;">대</span></span>
+              </div>
+              <input type="range" min="5" max="68" value="{{ v2gN }}" onChange="{{ onV2gN }}" style="width:100%;margin-top:14px;accent-color:#7c3aed;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--text-placeholder);margin-top:5px;"><span>5대</span><span>보유 전기 68대</span></div>
+            </div>
+            <div style="background:rgba(124,58,237,0.06);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">월 V2G 수익</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:#7c3aed;">{{ v2gMonth }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">만원</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">대당 월 14.4만원</div>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">연 환산 수익</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;">{{ v2gYear }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">만원</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">배터리 열화비 차감 후</div>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">피크 시 계통 기여</div>
+              <div style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--success);">{{ v2gMw }}<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:2px;">MW</span></div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:4px;">여름 피크 부담 완화</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:14px;font-weight:700;">하루 24시간 — 버스 배터리의 일과</span>
+                <span style="font-size:11.5px;font-weight:600;color:var(--text-secondary);">■ 심야 충전 · ■ 피크 방전 · ― 도시 전력수요</span>
+              </div>
+              <div style="position:relative;height:210px;"><canvas id="c-v2g"></canvas></div>
+            </div>
+            <div style="background:var(--grey-50);border-radius:12px;padding:14px 16px;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:8px;">산정 근거</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-body);line-height:1.7;">대당 일 가용 방전 80kWh (배터리 291kWh 중 운행 여유분) · 심야 충전-피크 방전 차익 60원/kWh (열화·손실 차감) · 방전 출력 100kW/대.<br><b style="color:var(--text-strong);">운행과 절대 충돌하지 않는 대기 시간</b>만 쓰도록 에이전트가 DTG 스케줄로 검증해요.</div>
+            </div>
+          </div>
+        </div>
+
         <!-- 충전 · 재원 · 크레딧 -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
           <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
@@ -1112,6 +1182,35 @@
             </div>
             <div style="font-size:12.5px;font-weight:600;color:var(--text-body);line-height:1.65;">현재 계획({{ planN }}대) 감축량 {{ planCo2 }} tCO₂를 온실가스 외부사업으로 인증하면 크레딧 판매로 <b style="color:var(--success);">연 {{ planKoc }}</b> 수익이 예상돼요 (톤당 8,900원).</div>
             <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:10px;">OBD·DTG 실측 데이터가 검증기관 제출용 증빙이 돼요 — Reports에서 명세 확인.</div>
+          </div>
+        </div>
+
+        <!-- 데이터 플라이휠 -->
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div style="font-size:16px;font-weight:700;">데이터가 쌓일수록, AI가 정확해져요</div>
+              <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">데이터 플라이휠</span>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">도입 후 6개월, 누적 주행 1,620만km가 학습 데이터가 됐어요 — 예지정비 적중률이 62%에서 91%까지 올랐어요. 이 축적은 후발 주자가 따라올 수 없는 해자예요.</div>
+            <div style="position:relative;height:190px;"><canvas id="c-fly"></canvas></div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;">다음 6개월, 데이터가 열어줄 것들</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="padding:12px 14px;background:var(--grey-50);border-radius:10px;">
+                <div style="font-size:13px;font-weight:700;">도착시간 예측 ±40초</div>
+                <div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">정류장별 체류 패턴 12개월 축적 시 — 시민 안내 고도화</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--grey-50);border-radius:10px;">
+                <div style="font-size:13px;font-weight:700;">노선 개편 시뮬레이션</div>
+                <div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">수요·속도 데이터로 개편 효과를 사전 검증 — 정책 리스크 축소</div>
+              </div>
+              <div style="padding:12px 14px;background:var(--grey-50);border-radius:10px;">
+                <div style="font-size:13px;font-weight:700;">배터리 수명 예측</div>
+                <div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">충방전 이력 기반 잔존가치 평가 — 전기버스 중고 시장·V2G 운영의 기반</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1324,7 +1423,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { dash: "1", sys: "전체", drvFilter: "전체", vq: "", period: "월간", notif: false, unread: true, planN: 12, repSel: 0,
-    appr: {}, chat: [], agentQ: "", showKeyPanel: false, keyDraft: "" };
+    appr: {}, chat: [], agentQ: "", showKeyPanel: false, keyDraft: "", v2gN: 40 };
 
   // 라이브 AI 키 — localStorage 전용 (저장소·코드에 절대 커밋 금지)
   _apiKey() {
@@ -1784,7 +1883,18 @@ class Component extends DCLogic {
       { no: "급행5", seg: "대구공항 ↔ 계명대", trips: "64회", pax: "4,080명", eff: "49.3L", co2: "1.34kg", grade: "C", c: "orange" },
     ].map(r => ({ ...r, badgeStyle: this.badge(r.c) }));
 
+    // 데이터 기반 정책 제안 — 운행 데이터가 도시 교통 정책의 근거가 되는 콘텐츠
+    const policyProps = [
+      { tag: "신호", title: "반월당 신호 주기 조정", desc: "직진 현시 12초 연장 시 급감속이 주 142건 → 60건으로 줄 것으로 예측돼요. 연료·사고 위험 동시 감소.",
+        basis: "히트맵 6개월", dept: "교통정책과 공유", c: "red" },
+      { tag: "정류장", title: "만평네거리 정류장 이설", desc: "정류장을 교차로에서 40m 이격하면 출발 직후 급가속이 주 58건 → 22건으로 줄어요.",
+        basis: "정차 후 가속 패턴", dept: "도로관리과 공유", c: "orange" },
+      { tag: "전용차로", title: "신천대로 전용차로 연장", desc: "2.4km 연장 시 정시율 +4%p, 공회전 -18% 예측 — 정체 구간 통과 속도 데이터 기반이에요.",
+        basis: "구간 속도 12만 건", dept: "대중교통과 공유", c: "blue" },
+    ].map(p => ({ ...p, tagStyle: this.badge(p.c) }));
+
     return {
+      policyProps,
       go1: this._go("1"), go2: this._go("2"), go3: this._go("3"),
       goV: this._go("V"), goD: this._go("D"), goR: this._go("R"),
       goP: this._go("P"), goT: this._go("T"), goA: this._go("A"),
@@ -1839,6 +1949,12 @@ class Component extends DCLogic {
       mgVehiclesEmpty: mgVehicles.length === 0,
       planN: this.state.planN,
       onPlanN: (e) => this.setState({ planN: Math.max(1, Math.min(50, parseInt(e.target.value, 10) || 1)) }),
+      // V2G: 월 수익 = N × 80kWh × 60원 × 30일 = N × 14.4만원, 피크 출력 100kW/대
+      v2gN: this.state.v2gN,
+      onV2gN: (e) => this.setState({ v2gN: Math.max(5, Math.min(68, parseInt(e.target.value, 10) || 5)) }),
+      v2gMonth: Math.round(this.state.v2gN * 14.4).toLocaleString(),
+      v2gYear: Math.round(this.state.v2gN * 14.4 * 12).toLocaleString(),
+      v2gMw: (this.state.v2gN * 0.1).toFixed(1),
       planScenarios, planTargets,
       planCo2: plan.co2.toLocaleString(), planFuelWon: plan.fuelEok.toFixed(1),
       planInvest: plan.investEok.toFixed(1), planRoi: plan.roi.toFixed(1),
@@ -1889,7 +2005,7 @@ class Component extends DCLogic {
   _canvasIds(dash) {
     return ({ "2": ["c-trend", "c-forecast", "c-system", "c-route", "c-fueltype", "c-corr"],
       "3": ["c-gauge", "c-events"],
-      "V": ["c-vstatus"], "R": ["c-reff", "c-rpax"], "P": ["c-plan"] })[dash] || [];
+      "V": ["c-vstatus"], "R": ["c-reff", "c-rpax"], "P": ["c-plan", "c-v2g", "c-fly"] })[dash] || [];
   }
   _tick() {
     this._tickMap();
@@ -1898,7 +2014,7 @@ class Component extends DCLogic {
     const ids = this._canvasIds(dash);
     const sentinel = ids[0];
     const missing = sentinel && document.getElementById(sentinel) && !window.Chart.getChart(sentinel);
-    if (dash + "|" + this.state.period + "|" + this.state.planN !== this._painted || missing) {
+    if (dash + "|" + this.state.period + "|" + this.state.planN + "|" + this.state.v2gN !== this._painted || missing) {
       this._destroy();
       this._paint();
     }
@@ -2056,6 +2172,34 @@ class Component extends DCLogic {
             scales: { x: { type: "linear", min: 1, max: 50, grid: noGrid, ticks: { stepSize: 7 },
                 title: { display: true, text: "전환 대수", font: { size: 11, weight: 600 } } },
               y: { grid, ticks: { callback: v => v + "t" } } } } });
+        // V2G 24시간 충방전 프로파일 — 심야 충전(음수) / 피크 방전(양수), MWh
+        const vN = this.state.v2gN;
+        const purple = "#7c3aed";
+        const v2gBars = [], v2gColors = [];
+        for (let h = 0; h < 24; h++) {
+          const isCharge = h >= 23 || h <= 5;     // 23~05시 심야 충전 (7시간)
+          const isDisch = h >= 14 && h <= 17;      // 14~17시 피크 방전 (4시간)
+          const val = isCharge ? -(vN * 80 / 7 / 1000) : isDisch ? (vN * 20 / 1000) : 0;
+          v2gBars.push(Math.round(val * 100) / 100);
+          v2gColors.push(isCharge ? "rgba(49,130,246,0.75)" : isDisch ? "rgba(3,178,108,0.85)" : faint);
+        }
+        const demand = [65,60,57,55,54,55,60,70,78,84,88,91,93,95,97,99,100,98,93,88,82,76,72,68];
+        mk("c-v2g", { data: { labels: Array.from({ length: 24 }, (_, h) => h + "시"),
+          datasets: [
+            { type: "bar", label: "충방전(MWh)", data: v2gBars, backgroundColor: v2gColors, borderRadius: 3, yAxisID: "yE", order: 2 },
+            { type: "line", label: "전력수요(%)", data: demand, borderColor: purple, borderWidth: 2, borderDash: [5, 4],
+              pointRadius: 0, tension: .4, yAxisID: "yD", order: 1 } ] },
+          options: { maintainAspectRatio: false, plugins: noLegend, animation: false,
+            scales: {
+              yE: { position: "left", grid, ticks: { callback: v => v + "MWh" } },
+              yD: { position: "right", min: 40, max: 110, grid: { drawOnChartArea: false }, ticks: { callback: v => v + "%" } },
+              x: { grid: noGrid, ticks: { maxTicksLimit: 12 } } } } });
+        // 데이터 플라이휠 — 예지정비 적중률 성장
+        mk("c-fly", { type: "line", data: { labels: ["2월", "3월", "4월", "5월", "6월", "7월"],
+          datasets: [{ label: "예지정비 적중률", data: [62, 71, 78, 83, 87, 91], borderColor: green,
+            backgroundColor: "rgba(3,178,108,.08)", fill: true, tension: .4, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: green }] },
+          options: { maintainAspectRatio: false, plugins: noLegend,
+            scales: { y: { min: 50, max: 100, grid, ticks: { callback: v => v + "%" } }, x: { grid: noGrid } } } });
       } else if (d === "R") {
         mk("c-reff", { type: "bar", data: { labels: ["급행1", "간선 401", "간선 649", "순환 2-1", "지선 356", "급행5"],
           datasets: [{ data: [31.2, 34.8, 38.1, 41.5, 46.9, 49.3], backgroundColor: [green, green, blue, blue, orange, orange], borderRadius: 8, barPercentage: .6 }] },
@@ -2064,7 +2208,7 @@ class Component extends DCLogic {
           datasets: [{ data: [128.4, 214.6, 96.2, 42.8], backgroundColor: blue, borderRadius: 8, barPercentage: .6 }] },
           options: { maintainAspectRatio: false, plugins: noLegend, scales: { y: { grid, ticks: { callback: v => v + "만명" } }, x: { grid: noGrid } } } });
       }
-      if (this._canvasIds(d).length === 0 || Object.keys(this.charts).length > 0) this._painted = d + "|" + this.state.period + "|" + this.state.planN;
+      if (this._canvasIds(d).length === 0 || Object.keys(this.charts).length > 0) this._painted = d + "|" + this.state.period + "|" + this.state.planN + "|" + this.state.v2gN;
     }, 30);
   }
 }
