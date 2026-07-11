@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QDrive — AI 기반 탄소중립 운영 플랫폼 (데모)</title>
+<meta name="description" content="대구 시내버스 OBD·DTG 데이터 기반 안전운전→연료 절감→탄소 감축 플랫폼 프로토타입 — 4개 이해관계자 화면 데모">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/fonts.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#f2f4f6;color:#191f28;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .wrap{max-width:880px;width:100%;}
+  .logo{display:flex;align-items:center;gap:12px;justify-content:center;}
+  .logo-box{width:44px;height:44px;border-radius:13px;background:#3182f6;display:flex;align-items:center;justify-content:center;}
+  h1{font-size:26px;font-weight:700;letter-spacing:-0.5px;text-align:center;margin-top:18px;}
+  .sub{font-size:14.5px;font-weight:500;color:#6b7684;text-align:center;margin-top:10px;line-height:1.65;}
+  .flow{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:12.5px;font-weight:700;color:#3182f6;flex-wrap:wrap;}
+  .flow span{background:rgba(49,130,246,0.08);padding:5px 12px;border-radius:9999px;}
+  .flow em{color:#b0b8c1;font-style:normal;}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:34px;}
+  @media (max-width:640px){.grid{grid-template-columns:1fr;}}
+  a.card{display:block;background:#fff;border-radius:16px;padding:22px 24px;text-decoration:none;color:inherit;box-shadow:0 2px 10px rgba(0,0,0,0.05);border:1px solid #eceef0;transition:transform .15s,box-shadow .15s;}
+  a.card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,0.09);}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px;margin-bottom:11px;}
+  .t-blue{background:rgba(49,130,246,0.1);color:#1b64da;}
+  .t-green{background:rgba(3,178,108,0.1);color:#03965c;}
+  .t-dark{background:#191f28;color:#7ee2a8;}
+  .t-orange{background:rgba(254,152,0,0.12);color:#c47600;}
+  .card h2{font-size:16.5px;font-weight:700;letter-spacing:-0.2px;}
+  .card p{font-size:13px;font-weight:500;color:#6b7684;margin-top:7px;line-height:1.6;}
+  .foot{text-align:center;font-size:11.5px;font-weight:500;color:#8b95a1;margin-top:30px;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo"><div class="logo-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg></div></div>
+  <h1>QDrive — AI 기반 탄소중립 운영 플랫폼</h1>
+  <p class="sub">대구 시내버스 412대의 OBD·DTG 데이터로<br>안전운전 → 연료 절감 → 탄소 감축을 만드는 플랫폼 프로토타입입니다.</p>
+  <div class="flow"><span>관제센터</span><em>→</em><span>기사</span><em>→</em><span>운수사 경영진</span><em>→</em><span>시민</span></div>
+
+  <div class="grid">
+    <a class="card" href="탄소중립 대시보드.dc.html">
+      <span class="tag t-blue">관제센터 · 웹</span>
+      <h2>탄소중립 관제 대시보드</h2>
+      <p>실시간 지도·히트맵, 탄소·연료·안전운행 대시보드, 차량·운전자·노선 관리, 전기버스 전환 시뮬레이터(AI Planning), 보고서 자동 생성(Reports)</p>
+    </a>
+    <a class="card" href="QDrive 기사앱.dc.html">
+      <span class="tag t-orange">기사 · 8″ 태블릿</span>
+      <h2>QDrive 기사앱</h2>
+      <p>내비형 실시간 AI 코칭(위험 구간·간격·공회전), 운행 리포트, 사내 주간 랭킹과 배지 게이미피케이션</p>
+    </a>
+    <a class="card" href="운수사 경영 대시보드.dc.html">
+      <span class="tag t-dark">운수사 경영진</span>
+      <h2>세운버스(주) 경영 리포트</h2>
+      <p>안전운전이 만든 월 손익 효과(연료비·예지정비·인센티브), 5개사 벤치마크, 전기 전환 투자 검토, AI 경영 인사이트</p>
+    </a>
+    <a class="card" href="시민 탄소 대시보드.dc.html">
+      <span class="tag t-green">시민 · 공개</span>
+      <h2>시민 탄소 대시보드</h2>
+      <p>오늘 아낀 탄소 카운터, 소나무 환산, 월별 감축 추이, 내 노선의 친환경 등급 조회</p>
+    </a>
+  </div>
+
+  <p class="foot">모든 데이터는 데모용 목업입니다 · 절감량은 도입 전 12개월 연비 베이스라인 대비 실측 기준으로 설계 · 배출계수 환경부 고시<br>지도 타일(CARTO)·차트(Chart.js)·지도(Leaflet)는 CDN 로드 — 인터넷 연결 필요</p>
+</div>
+</body>
+</html>
