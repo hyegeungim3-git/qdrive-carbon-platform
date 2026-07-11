@@ -87,6 +87,10 @@
         노선 관리
       </button>
       <div style="font-size:11px;font-weight:700;color:var(--text-placeholder);padding:18px 12px 6px;letter-spacing:0.4px;">플래닝 · 보고</div>
+      <button onClick="{{ goA }}" style="{{ navA }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg>
+        AI 에이전트<span style="margin-left:auto;font-size:10px;font-weight:700;color:#fff;background:var(--success);padding:2px 7px;border-radius:9px;">NEW</span>
+      </button>
       <button onClick="{{ goP }}" style="{{ navP }}">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="M12 22v-2"/><path d="m17 20.66-1-1.73"/><path d="M11 10.27 7 3.34"/><path d="m20.66 17-1.73-1"/><path d="m3.34 7 1.73 1"/><path d="M14 12h8"/><path d="M2 12h2"/></svg>
         AI Planning
@@ -1170,13 +1174,166 @@
       </div>
       </sc-if>
 
+      <!-- ===================== PAGE A : AI 에이전트 센터 ===================== -->
+      <sc-if value="{{ isPageA }}" hint-placeholder-val="{{ false }}">
+      <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- 아침 브리핑 -->
+        <div style="background:var(--grey-900);border-radius:14px;padding:18px 22px;color:#fff;">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.12);padding:6px 12px;border-radius:9999px;flex:none;">
+              <span style="width:7px;height:7px;border-radius:50%;background:#7ee2a8;animation:livePulse 1.6s infinite;"></span>오늘 06:00 아침 브리핑
+            </span>
+            <span style="font-size:14px;font-weight:700;">에이전트 4개가 밤새 412대 · 486명의 데이터를 분석했어요</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:600;color:#b0b8c1;">수행 작업 1,847건 · 승인 대기 3건</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
+            <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;">
+              <div style="font-size:11.5px;font-weight:700;color:#ff8a94;">⚠ 정비 시급</div>
+              <div style="font-size:12.5px;font-weight:600;color:#e5e8eb;margin-top:5px;line-height:1.55;">세진 2044호 인젝터 고장 확률 87 → 91% 상승 — 정비 예약안을 준비해 뒀어요.</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;">
+              <div style="font-size:11.5px;font-weight:700;color:#7ee2a8;">✓ 목표 순항</div>
+              <div style="font-size:12.5px;font-weight:600;color:#e5e8eb;margin-top:5px;line-height:1.55;">어제 절감 2.1t — 7월 목표 페이스 102%. 유일한 리스크는 폭염 에어컨 부하예요.</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;">
+              <div style="font-size:11.5px;font-weight:700;color:#8fb6f9;">↗ 개선 기회</div>
+              <div style="font-size:12.5px;font-weight:600;color:#e5e8eb;margin-top:5px;line-height:1.55;">심야 충전 비중 74%로 올리면 월 120만원 추가 절감 — 변경안이 승인을 기다려요.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 에이전트 4 카드 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <sc-for list="{{ agents }}" as="g" hint-placeholder-count="4">
+            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="{{ g.iconStyle }}">{{ g.icon }}</div>
+                <div style="min-width:0;">
+                  <div style="font-size:14px;font-weight:700;">{{ g.name }}</div>
+                  <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--success);"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);animation:livePulse 1.6s infinite;"></span>작동 중</div>
+                </div>
+              </div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:11px;line-height:1.5;">{{ g.role }}</div>
+              <div style="border-top:1px solid var(--divider);margin-top:11px;padding-top:10px;">
+                <div style="font-size:12.5px;font-weight:700;">{{ g.stat }}</div>
+                <div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:3px;">최근 — {{ g.last }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- 승인 대기 + 코파일럿 -->
+        <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:12px;align-items:start;">
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div style="font-size:16px;font-weight:700;">승인 대기</div>
+              <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">사람이 결정해요</span>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:12px;line-height:1.55;">에이전트는 조치를 준비까지만 해요 — 실행은 항상 관리자의 승인 후예요.</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ approvalItems }}" as="p" hint-placeholder-count="3">
+                <div style="padding:14px 15px;border:1px solid var(--border);border-radius:12px;">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+                    <span style="{{ p.agentTag }}">{{ p.agent }}</span>
+                    <span style="font-size:13.5px;font-weight:700;">{{ p.title }}</span>
+                  </div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text-body);line-height:1.6;">{{ p.desc }}</div>
+                  <sc-if value="{{ p.pending }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:8px;margin-top:11px;">
+                      <button onClick="{{ p.onOk }}" style="flex:1;height:36px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">승인</button>
+                      <button onClick="{{ p.onHold }}" style="flex:1;height:36px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text-body);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">보류</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ p.decided }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ p.stateStyle }}">{{ p.stateText }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div style="font-size:16px;font-weight:700;">코파일럿에게 물어보기</div>
+              <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">조회·분석 단계 공개</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;min-height:200px;max-height:380px;overflow-y:auto;padding:2px;">
+              <sc-if value="{{ chatEmpty }}" hint-placeholder-val="{{ true }}">
+                <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:36px 16px;text-align:center;font-size:13px;font-weight:600;color:var(--text-secondary);line-height:1.7;">아래 추천 질문을 눌러 보세요.<br>에이전트가 어떤 데이터를 어떻게 봤는지, 과정을 공개하며 답해요.</div>
+              </sc-if>
+              <sc-for list="{{ chat }}" as="m" hint-placeholder-count="1">
+                <div>
+                  <div style="display:flex;justify-content:flex-end;"><span style="background:var(--primary);color:#fff;font-size:13px;font-weight:600;padding:9px 14px;border-radius:14px 14px 3px 14px;max-width:85%;line-height:1.5;">{{ m.q }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:6px;margin-top:9px;padding-left:4px;">
+                    <sc-for list="{{ m.steps }}" as="s" hint-placeholder-count="2">
+                      <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">
+                        <span style="{{ s.dotStyle }}"></span>{{ s.label }}
+                      </div>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ m.answer }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:9px;background:var(--grey-50);border-radius:3px 14px 14px 14px;padding:12px 15px;font-size:13px;font-weight:600;color:var(--text-body);line-height:1.65;max-width:92%;">{{ m.answer }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;">
+              <sc-for list="{{ copilotChips }}" as="c" hint-placeholder-count="3">
+                <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <input onChange="{{ onAgentQ }}" value="{{ agentQ }}" placeholder="자유롭게 물어보세요 (데모)" style="flex:1;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text-strong);background:#fff;">
+              <button onClick="{{ onAgentSend }}" style="height:40px;padding:0 16px;border:none;border-radius:10px;background:var(--grey-900);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">전송</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:14px 18px;background:var(--grey-50);border-radius:12px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-placeholder)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span style="font-size:12px;font-weight:500;color:var(--text-secondary);line-height:1.6;">이 화면은 에이전트 UX 데모예요 — 실서비스에서는 LLM 에이전트가 실데이터와 도구(정비 예약·충전 스케줄·보고 제출 API)에 연결돼요. 모든 조치는 사람 승인 후에만 실행되고, 에이전트의 조회·분석 과정은 항상 기록·공개돼요.</span>
+        </div>
+      </div>
+      </sc-if>
+
     </main>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { dash: "1", sys: "전체", drvFilter: "전체", vq: "", period: "월간", notif: false, unread: true, planN: 12, repSel: 0 };
+  state = { dash: "1", sys: "전체", drvFilter: "전체", vq: "", period: "월간", notif: false, unread: true, planN: 12, repSel: 0,
+    appr: {}, chat: [], agentQ: "" };
+
+  // 코파일럿 사전 정의 Q&A — 실서비스에서는 LLM 에이전트가 실데이터로 답한다 (화면에 명시)
+  copilotQA() {
+    return [
+      { q: "이번 달 절감 목표 달성 가능해?",
+        steps: ["DTG 주행·OBD 연료 데이터 조회 (7/1~7/11)", "베이스라인 대비 절감 페이스 분석", "잔여 20일 시나리오 시뮬레이션"],
+        a: "가능해요. 목표 75t 중 11일까지 72.6t 페이스로 환산 달성률 102%예요. 리스크는 폭염 에어컨 부하(연료 +3%)인데, 공회전 코칭을 유지하면 상쇄 가능한 수준이에요." },
+      { q: "연비가 가장 많이 떨어진 차량은?",
+        steps: ["412대 주간 연비 변화율 계산", "정비 이력·이상 패턴 교차 분석"],
+        a: "세진 2044호예요. 2.51 → 1.93 km/L(-23%)로 인젝터 이상 패턴과 91% 일치해요. 정비 예약안을 왼쪽 승인 대기에 올려 뒀어요 — 바로 승인할 수 있어요." },
+      { q: "간선 401을 전기로 전환하면?",
+        steps: ["간선 401 노후 경유 6대 식별", "전환 시뮬레이션 (보조금·전력단가 반영)"],
+        a: "노후 경유 6대 전환 시 연 214 tCO₂ 감축, 연료비 2.46억원 절감, 보조금 반영 회수 2.7년이에요. AI Planning에서 대수를 바꿔 가며 비교해 보세요." },
+    ];
+  }
+
+  // 질문 실행 — 조회·분석 단계가 순차 공개된 뒤 답변 (재현 가능한 고정 시나리오)
+  _ask(qi) {
+    const qa = this.copilotQA()[qi];
+    const idx = this.state.chat.length;
+    this.setState({ chat: [...this.state.chat, { qi, phase: 0 }] });
+    this._chatTimers = this._chatTimers || [];
+    for (let p = 1; p <= qa.steps.length + 1; p++) {
+      this._chatTimers.push(setTimeout(() => {
+        const chat = this.state.chat.slice();
+        if (chat[idx]) { chat[idx] = { ...chat[idx], phase: p }; this.setState({ chat }); }
+      }, p * 750));
+    }
+  }
 
   // 전환 시뮬레이터 — AI가 효과 큰 차량부터 선정하므로 대당 감축량은 한계 체감 (k번째 차량 = 36.5 - 0.3k tCO₂/년)
   // 대당 실투자 1.1억(차량가 3.9억 - 보조금 2.8억), 연료비 절감은 감축량 비례 (35.7tCO₂ ↔ 4,100만원)
@@ -1271,6 +1428,7 @@ class Component extends DCLogic {
       "R": ["노선 관리", "노선 정보와 운행 데이터, 노선 효율을 분석해요"],
       "P": ["AI Planning", "전기버스 전환·충전 최적화를 AI 시뮬레이션으로 계획해요"],
       "T": ["Reports", "지자체 제출·내부 보고용 문서를 운영 데이터로 자동 생성해요"],
+      "A": ["AI 에이전트 센터", "에이전트가 분석·조치를 준비하고, 사람은 승인만 해요"],
     };
 
     // 계통별 현황
@@ -1424,6 +1582,62 @@ class Component extends DCLogic {
     ].map(e => ({ ...e, badgeStyle: this.badge(e.c) }));
 
     // ===== 노선 관리 =====
+    // ===== AI 에이전트 센터 =====
+    const agentIcon = (bg, fg) => ({ width: 38, height: 38, borderRadius: 11, flex: "none", display: "flex",
+      alignItems: "center", justifyContent: "center", fontSize: 19, background: bg, color: fg });
+    const agents = [
+      { icon: "🧭", name: "코칭 에이전트", role: "기사 486명 주행 분석 · 실시간 코칭 발송", stat: "밤새 코칭 1,284건", last: "교육 대상 3명 신규 선별", iconStyle: agentIcon("var(--primary-weak)") },
+      { icon: "🔧", name: "정비 에이전트", role: "OBD 이상 패턴 스캔 · 예지정비", stat: "412대 전수 스캔", last: "세진 2044호 정비 예약안 작성", iconStyle: agentIcon("rgba(254,152,0,0.12)") },
+      { icon: "⚡", name: "플래닝 에이전트", role: "전환·충전 스케줄 최적화", stat: "유가 반영 시나리오 재계산", last: "심야 충전 74% 변경안 준비", iconStyle: agentIcon("rgba(3,178,108,0.1)") },
+      { icon: "📄", name: "보고 에이전트", role: "실적 집계 · 증빙 패키징", stat: "7월 중간 실적 집계", last: "KOC 증빙 데이터 패키징 완료", iconStyle: agentIcon("var(--grey-100)") },
+    ];
+
+    const apprRaw = [
+      { agent: "정비", title: "세진 2044호 인젝터 정비 예약", desc: "7/14(월) 09:00 · 협력 정비소 배정 · 예상 842,000원 — 고장 확률 91%, 방치 시 돌발 결행이 예상돼요.",
+        okMsg: "정비가 예약됐어요 — 세진교통과 정비소에 통보했어요" },
+      { agent: "코칭", title: "교육 대상 3명 과정 배정", desc: "한지훈·오세영·임태규 — 공회전·급가속 맞춤 과정, 다음 주 화요일 배정안이에요.",
+        okMsg: "교육 과정이 배정됐어요 — 대상자 기사앱으로 안내를 보냈어요" },
+      { agent: "플래닝", title: "심야 충전 비중 68 → 74% 변경", desc: "전기 68대 충전 스케줄 조정 — 월 120만원 추가 절감, 운행 영향 없음을 검증했어요.",
+        okMsg: "충전 스케줄이 변경됐어요 — 다음 충전 사이클부터 적용돼요" },
+    ];
+    const approvalItems = apprRaw.map((p, i) => {
+      const st = this.state.appr[i];
+      return { agent: p.agent, title: p.title, desc: p.desc,
+        agentTag: this.badge(st === "ok" ? "green" : st === "hold" ? "grey" : "blue"),
+        pending: !st, decided: !!st,
+        stateText: st === "ok" ? "✓ 승인됨 — 에이전트가 실행 중이에요" : "보류됨 — 조건 변화를 계속 관찰해요",
+        stateStyle: { marginTop: 11, padding: "9px 12px", borderRadius: 9, fontSize: 12.5, fontWeight: 700, textAlign: "center",
+          background: st === "ok" ? "rgba(3,178,108,0.1)" : "var(--grey-100)", color: st === "ok" ? "#03965c" : "var(--text-body)" },
+        onOk: () => { this.setState({ appr: { ...this.state.appr, [i]: "ok" } }); this._toast(p.okMsg); },
+        onHold: () => { this.setState({ appr: { ...this.state.appr, [i]: "hold" } }); this._toast("보류했어요 — 에이전트가 조건 변화를 계속 관찰해요"); } };
+    });
+
+    const qaDefs = this.copilotQA();
+    const chat = this.state.chat.map(m => {
+      if (m.custom) return { q: m.custom, steps: [], answer: "데모에서는 아래 추천 질문 3개에 응답해요. 실서비스에서는 LLM 에이전트가 실데이터를 조회해 어떤 질문에도 답합니다." };
+      const qa = qaDefs[m.qi];
+      const visible = qa.steps.slice(0, Math.min(m.phase, qa.steps.length));
+      return { q: qa.q,
+        steps: visible.map((label, j) => {
+          const done = j < m.phase - 1 || m.phase > qa.steps.length;
+          return { label: (done ? "✓ " : "") + label,
+            dotStyle: { width: 7, height: 7, borderRadius: "50%", flex: "none",
+              background: done ? "var(--success)" : "var(--primary)",
+              animation: done ? "none" : "livePulse 0.9s infinite" } };
+        }),
+        answer: m.phase > qa.steps.length ? qa.a : false };
+    });
+    const askedSet = new Set(this.state.chat.map(m => m.qi));
+    const copilotChips = qaDefs.map((qa, i) => {
+      const asked = askedSet.has(i);
+      return { label: qa.q,
+        onClick: () => { if (!asked) this._ask(i); },
+        style: { appearance: "none", border: "1px solid " + (asked ? "var(--border)" : "var(--primary)"),
+          background: asked ? "var(--grey-50)" : "var(--primary-weak)", color: asked ? "var(--text-placeholder)" : "var(--primary)",
+          fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "8px 13px", borderRadius: 9999,
+          cursor: asked ? "default" : "pointer" } };
+    });
+
     // ===== AI Planning =====
     const plan = this.planCalc(this.state.planN);
     const planScenarios = [
@@ -1481,13 +1695,21 @@ class Component extends DCLogic {
     return {
       go1: this._go("1"), go2: this._go("2"), go3: this._go("3"),
       goV: this._go("V"), goD: this._go("D"), goR: this._go("R"),
-      goP: this._go("P"), goT: this._go("T"),
+      goP: this._go("P"), goT: this._go("T"), goA: this._go("A"),
       nav1: this.navStyle("1"), nav2: this.navStyle("2"), nav3: this.navStyle("3"),
       navV: this.navStyle("V"), navD: this.navStyle("D"), navR: this.navStyle("R"),
-      navP: this.navStyle("P"), navT: this.navStyle("T"),
+      navP: this.navStyle("P"), navT: this.navStyle("T"), navA: this.navStyle("A"),
       isDash1: dash === "1", isDash2: dash === "2", isDash3: dash === "3",
       isPageV: dash === "V", isPageD: dash === "D", isPageR: dash === "R",
-      isPageP: dash === "P", isPageT: dash === "T",
+      isPageP: dash === "P", isPageT: dash === "T", isPageA: dash === "A",
+      agents, approvalItems, chat, copilotChips, chatEmpty: chat.length === 0,
+      agentQ: this.state.agentQ,
+      onAgentQ: (e) => this.setState({ agentQ: e.target.value }),
+      onAgentSend: () => {
+        const q = this.state.agentQ.trim();
+        if (!q) return;
+        this.setState({ chat: [...this.state.chat, { custom: q }], agentQ: "" });
+      },
       pageTitle: titles[dash][0], pageSub: titles[dash][1],
       systems, chips, routes, alerts, drivers, vehicles, anomalies, zones, recs,
       mgVehicles, predicts, fixLogs, driverChips, mgDrivers, eduTargets, routeStats,
@@ -1543,7 +1765,12 @@ class Component extends DCLogic {
 
   componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
   componentDidUpdate() { this._tick(); }
-  componentWillUnmount() { clearInterval(this._iv); if (this._mapAnim) clearInterval(this._mapAnim); this._destroy(); }
+  componentWillUnmount() {
+    clearInterval(this._iv);
+    if (this._mapAnim) clearInterval(this._mapAnim);
+    (this._chatTimers || []).forEach(t => clearTimeout(t));
+    this._destroy();
+  }
 
   _canvasIds(dash) {
     return ({ "2": ["c-trend", "c-forecast", "c-system", "c-route", "c-fueltype", "c-corr"],
