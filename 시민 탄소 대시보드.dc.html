@@ -166,6 +166,7 @@
           <div style="font-size:38px;font-weight:700;color:#03965c;font-variant-numeric:tabular-nums;letter-spacing:-1px;margin-top:6px;">{{ calcCo2 }}<span style="font-size:17px;font-weight:700;margin-left:3px;">kg CO₂</span></div>
           <div style="font-size:14px;font-weight:700;margin-top:8px;">소나무 <span style="color:#03965c;">{{ calcPine }}그루</span>가 1년간 흡수하는 양이에요 🌲</div>
           <div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:10px;">승용차 170g/km vs 시내버스 1인당 24g/km 기준</div>
+          <button onClick="{{ onShare }}" style="margin-top:14px;height:44px;padding:0 22px;border:none;border-radius:12px;background:#03965c;color:#fff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;">내 절감량 공유하기</button>
         </div>
       </div>
     </div>
@@ -222,13 +223,47 @@ class Component extends DCLogic {
     ];
   }
 
+  // 공유 실패·성공 피드백용 토스트
+  _toast(msg) {
+    const t = document.createElement("div");
+    t.textContent = msg;
+    t.style.cssText = "position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:rgba(25,31,40,0.92);color:#fff;font:700 13px/1.4 'Pretendard Variable',Pretendard,sans-serif;padding:11px 18px;border-radius:9999px;box-shadow:0 8px 24px rgba(0,0,0,0.25);z-index:9999;opacity:0;transition:opacity .25s;white-space:nowrap;";
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = "1"; });
+    setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2200);
+  }
+
   renderVals() {
     const routes = this.routes();
     const sel = routes[this.state.route];
     const gradeColor = { A: "#03b26c", B: "#3182f6", C: "#fe9800" }[sel.grade];
     // 승용차 170g/km − 버스 1인당 24g/km = 146g/km 절감 × 연 240일
     const calcCo2 = Math.round(this.state.calcKm * 240 * 0.146);
+    const calcPineN = Math.round(calcCo2 / 6.6);
     return {
+      onShare: async () => {
+        const text = "🌱 나는 버스로 1년에 CO₂ " + calcCo2.toLocaleString() + "kg을 아껴요 — 소나무 " + calcPineN.toLocaleString() + "그루만큼! 당신은 얼마나 아낄 수 있을까요?";
+        const url = location.origin + location.pathname;
+        try {
+          if (navigator.share) { await navigator.share({ title: "대구 시내버스 탄소 리포트", text, url }); return; }
+          await navigator.clipboard.writeText(text + " " + url);
+          this._toast("공유 문구가 복사됐어요 — 어디든 붙여넣어 보세요");
+        } catch (e) {
+          if (e && e.name === "AbortError") return; // 사용자가 공유 취소
+          // 클립보드 API가 막힌 브라우저용 레거시 폴백
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text + " " + url;
+            ta.style.cssText = "position:fixed;left:-9999px;top:0;";
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand("copy");
+            ta.remove();
+            if (ok) { this._toast("공유 문구가 복사됐어요 — 어디든 붙여넣어 보세요"); return; }
+          } catch (e2) {}
+          this._toast("복사에 실패했어요 — 브라우저 권한을 확인해 주세요");
+        }
+      },
       heroKg: this.state.heroKg.toLocaleString(),
       calcKm: this.state.calcKm,
       onCalcKm: (e) => this.setState({ calcKm: Math.max(2, Math.min(60, parseInt(e.target.value, 10) || 2)) }),
