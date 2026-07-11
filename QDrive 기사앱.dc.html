@@ -248,6 +248,42 @@
               </div>
             </div>
 
+            <!-- 게이미피케이션: 주간 랭킹 + 배지 -->
+            <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:14px;">
+              <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                  <div style="font-size:16px;font-weight:700;">이번 주 사내 랭킹</div>
+                  <span style="font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:4px 10px;border-radius:9999px;">세운버스(주)</span>
+                </div>
+                <div style="display:flex;flex-direction:column;">
+                  <sc-for list="{{ ranking }}" as="r" hint-placeholder-count="5">
+                    <div style="{{ r.rowStyle }}">
+                      <div style="{{ r.rankStyle }}">{{ r.rank }}</div>
+                      <div style="flex:1;min-width:0;font-size:13.5px;font-weight:700;">{{ r.name }}<sc-if value="{{ r.me }}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px;font-size:10px;font-weight:700;color:#fff;background:var(--primary);padding:2px 7px;border-radius:9px;">나</span></sc-if></div>
+                      <span style="{{ r.deltaStyle }}">{{ r.delta }}</span>
+                      <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;">{{ r.score }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="border-top:1px solid var(--divider);margin-top:12px;padding-top:10px;font-size:12px;font-weight:600;color:var(--text-secondary);">이번 주 1위 유지 시 <b style="color:var(--success);">인센티브 +80,000원</b></div>
+              </div>
+              <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                  <div style="font-size:16px;font-weight:700;">내 배지</div>
+                  <span style="font-size:12px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:4px 10px;border-radius:9999px;">4 / 6 획득</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                  <sc-for list="{{ badges }}" as="b" hint-placeholder-count="6">
+                    <div style="{{ b.cardStyle }}">
+                      <div style="font-size:26px;line-height:1;">{{ b.icon }}</div>
+                      <div style="font-size:12.5px;font-weight:700;margin-top:7px;">{{ b.name }}</div>
+                      <div style="font-size:10.5px;font-weight:600;color:var(--text-secondary);margin-top:3px;line-height:1.45;">{{ b.cond }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
             <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                 <div style="font-size:16px;font-weight:700;">개선 포인트</div>
@@ -312,6 +348,34 @@ class Component extends DCLogic {
       { n: "1", time: "06:30 – 07:58", detail: "서부정류장 → 동대구역 · 32km", score: "96", fuel: "3.4km/L" },
     ];
 
+    // 게이미피케이션 — 사내 주간 랭킹
+    const ranking = [
+      { rank: 1, name: "김성호", score: "96.2", delta: "▲ 2", up: true, me: true },
+      { rank: 2, name: "박정환", score: "94.1", delta: "▼ 1", up: false },
+      { rank: 3, name: "이동욱", score: "93.5", delta: "▼ 1", up: false },
+      { rank: 4, name: "강민준", score: "91.2", delta: "—", flat: true },
+      { rank: 5, name: "조현우", score: "90.8", delta: "▲ 3", up: true },
+    ].map(r => ({ ...r, me: !!r.me,
+      deltaStyle: { fontSize: 12, fontWeight: 700, marginRight: 10, flex: "none",
+        color: r.flat ? "var(--text-placeholder)" : r.up ? "var(--success)" : "var(--red-500)" },
+      rowStyle: { display: "flex", alignItems: "center", gap: 11, padding: "9px 8px", borderRadius: 10,
+        background: r.me ? "var(--primary-weak)" : "transparent" },
+      rankStyle: { width: 26, height: 26, flex: "none", borderRadius: 8, display: "flex", alignItems: "center",
+        justifyContent: "center", fontSize: 13, fontWeight: 700,
+        background: r.rank === 1 ? "var(--primary)" : "var(--grey-100)", color: r.rank === 1 ? "#fff" : "var(--text-body)" } }));
+
+    // 배지 — 획득 4 · 도전 중 2
+    const badges = [
+      { icon: "🌿", name: "에코 마스터", cond: "월 연비 상위 10%", got: true },
+      { icon: "🛡️", name: "무사고 500일", cond: "537일 달성 중", got: true },
+      { icon: "⏱️", name: "정시의 달인", cond: "월 정시율 98% 이상", got: true },
+      { icon: "🌊", name: "부드러운 발", cond: "예측 감속 1,000회", got: true },
+      { icon: "💤", name: "공회전 제로", cond: "주 5일 무공회전 · 4/5일째", got: false },
+      { icon: "🏆", name: "월간 MVP", cond: "월 종합 1위 · 이번 달 도전", got: false },
+    ].map(b => ({ ...b, cardStyle: { padding: "13px 12px", border: "1px solid var(--border)", borderRadius: 12,
+      textAlign: "center", background: b.got ? "#fff" : "var(--grey-50)",
+      opacity: b.got ? 1 : 0.62, filter: b.got ? "none" : "grayscale(0.9)" } }));
+
     const tips = [
       { tag: "공회전", title: "대기 중 시동 끄기", desc: "동대구역 회차 대기 시 공회전이 하루 평균 22분이에요. 5분 이상 대기 시 시동을 꺼 보세요.", effect: "월 14L 연료 절감", c: "orange" },
       { tag: "정속", title: "신천대로 정속 유지", desc: "70km/h 정속 구간에서 가감속이 잦아요. 페달을 일정하게 유지해 보세요.", effect: "연비 +0.2km/L 기대", c: "blue" },
@@ -324,7 +388,7 @@ class Component extends DCLogic {
       goHome: () => this.setState({ tab: "home" }),
       goReport: () => this.setState({ tab: "report" }),
       tabHome: this.tabStyle("home"), tabReport: this.tabStyle("report"),
-      trips, tips,
+      trips, tips, ranking, badges,
     };
   }
 

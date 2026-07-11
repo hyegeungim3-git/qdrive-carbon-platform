@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세운버스(주) 경영 리포트 — QDrive</title>
+<meta name="description" content="운수회사 경영진용 대시보드 — 안전운전이 만든 비용 절감과 경영 효과를 한 화면에">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23191f28'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%237ee2a8'/%3E%3C/svg%3E">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/motion.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/base.css">
+  <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/styles.css">
+  <script src="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:var(--font-sans);background:var(--surface);-webkit-font-smoothing:antialiased;color:var(--text-strong);}
+    a{color:var(--link);text-decoration:none;}
+    @keyframes ecoFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+    .exec-section{animation:ecoFade .35s ease;}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;min-height:100dvh;">
+  <div style="max-width:1080px;margin:0 auto;padding:28px 24px 40px;">
+
+    <!-- 헤더 -->
+    <div class="exec-section" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--grey-900);display:flex;align-items:center;justify-content:center;">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7ee2a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+        </div>
+        <div>
+          <div style="font-size:19px;font-weight:700;letter-spacing:-0.3px;">세운버스(주) 경영 리포트</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);">2026년 7월 · 보유 98대 · 기사 115명 · QDrive 자동 집계</div>
+        </div>
+      </div>
+      <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:8px 14px;border-radius:9999px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8m-4-4v4M7 4h10l1 7c0 2.5-2 4-3.5 4h-5C8 15 6 13.5 6 11z"/></svg>
+        절감률 5개사 중 1위
+      </span>
+    </div>
+
+    <!-- 이번 달 손익 효과 -->
+    <div class="exec-section" style="background:var(--grey-900);border-radius:16px;padding:22px 24px;color:#fff;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <span style="font-size:15px;font-weight:700;">이번 달 안전운전이 만든 손익 효과</span>
+        <span style="font-size:12px;font-weight:600;color:#b0b8c1;">OBD·DTG 실측 기준 · 7월 11일까지</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1.1fr;gap:12px;align-items:center;">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#b0b8c1;">연료비 절감</div>
+          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;">1,065<span style="font-size:13px;font-weight:600;color:#b0b8c1;margin-left:2px;">만원</span></div>
+          <div style="font-size:11.5px;font-weight:600;color:#8b95a1;margin-top:3px;">6,870L · CO₂ 18.4t</div>
+        </div>
+        <span style="font-size:18px;font-weight:700;color:#8b95a1;">+</span>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#b0b8c1;">예지정비 회피 비용</div>
+          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;">420<span style="font-size:13px;font-weight:600;color:#b0b8c1;margin-left:2px;">만원</span></div>
+          <div style="font-size:11.5px;font-weight:600;color:#8b95a1;margin-top:3px;">돌발 결행 3건 예방</div>
+        </div>
+        <span style="font-size:18px;font-weight:700;color:#8b95a1;">−</span>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#b0b8c1;">기사 인센티브 지급</div>
+          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;">310<span style="font-size:13px;font-weight:600;color:#b0b8c1;margin-left:2px;">만원</span></div>
+          <div style="font-size:11.5px;font-weight:600;color:#8b95a1;margin-top:3px;">우수 기사 21명</div>
+        </div>
+        <div style="background:rgba(3,178,108,0.16);border:1px solid rgba(3,178,108,0.35);border-radius:12px;padding:14px 16px;">
+          <div style="font-size:12px;font-weight:700;color:#7ee2a8;">월 순 효과</div>
+          <div style="font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;color:#7ee2a8;">+1,175<span style="font-size:14px;font-weight:600;margin-left:2px;">만원</span></div>
+          <div style="font-size:11.5px;font-weight:600;color:#a7d9bd;margin-top:3px;">연 환산 약 1.4억원</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 추이 + 기사 분포 -->
+    <div class="exec-section" style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px;">
+      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+        <div style="font-size:15.5px;font-weight:700;">월별 연료비 절감액</div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:3px;">도입(2월) 후 6개월 연속 증가 — 코칭 정착 효과예요.</div>
+        <div style="position:relative;height:220px;margin-top:14px;"><canvas id="e-save"></canvas></div>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+        <div style="font-size:15.5px;font-weight:700;margin-bottom:6px;">기사 성과 분포</div>
+        <div style="position:relative;height:170px;display:flex;align-items:center;justify-content:center;"><canvas id="e-dist"></canvas></div>
+        <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:12px;font-weight:600;">
+          <span style="color:var(--success);">● 우수 21</span>
+          <span style="color:var(--primary);">● 일반 85</span>
+          <span style="color:var(--orange-500);">● 교육 대상 9</span>
+        </div>
+        <div style="border-top:1px solid var(--divider);margin-top:12px;padding-top:10px;font-size:12px;font-weight:600;color:var(--text-secondary);line-height:1.6;">교육 대상 9명이 맞춤 교육을 마치면 월 절감액이 약 <b style="color:var(--text-strong);">96만원</b> 더 늘어요.</div>
+      </div>
+    </div>
+
+    <!-- 벤치마크 + 차량 전환 -->
+    <div class="exec-section" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:15.5px;font-weight:700;">5개사 절감률 벤치마크</div>
+          <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">베이스라인 대비 · 7월</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <sc-for list="{{ bench }}" as="b" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px;">
+              <div style="width:96px;flex:none;font-size:13px;font-weight:700;">{{ b.name }}<sc-if value="{{ b.me }}" hint-placeholder-val="{{ false }}"><span style="margin-left:5px;font-size:10px;font-weight:700;color:#fff;background:var(--success);padding:2px 6px;border-radius:8px;">우리</span></sc-if></div>
+              <div style="flex:1;height:10px;border-radius:9999px;background:var(--grey-100);overflow:hidden;">
+                <div style="{{ b.barStyle }}"></div>
+              </div>
+              <span style="width:52px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">{{ b.pct }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-top:1px solid var(--divider);margin-top:14px;padding-top:11px;font-size:12px;font-weight:600;color:var(--text-secondary);">에코 드라이빙 실천율 91% — 격차의 핵심은 기사 참여율이에요.</div>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <div style="font-size:15.5px;font-weight:700;">보유 차량 · 전환 검토</div>
+          <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">AI Planning 연동</span>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;background:var(--grey-50);border-radius:10px;padding:11px 13px;text-align:center;"><div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;">58</div><div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">경유</div></div>
+          <div style="flex:1;background:var(--grey-50);border-radius:10px;padding:11px 13px;text-align:center;"><div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;">18</div><div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">CNG</div></div>
+          <div style="flex:1;background:rgba(3,178,108,0.08);border-radius:10px;padding:11px 13px;text-align:center;"><div style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">22</div><div style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">전기</div></div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:12px;padding:13px 15px;">
+          <div style="font-size:13px;font-weight:700;">AI 추천 — 노후 경유 2대 우선 전환</div>
+          <div style="font-size:12.5px;font-weight:600;color:var(--text-body);margin-top:5px;line-height:1.6;">세운 2290호·세운 0091호는 차령 10년 이상, 연비 하위 15%예요. 전환 시 대당 연 35.7tCO₂ 감축, 보조금 반영 회수 2.7년.</div>
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:7px;">2026년 시 보조금 잔여 28대 · 신청 마감 9월</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 경영 인사이트 -->
+    <div class="exec-section" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--blue-600);">인센티브 ROI</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;line-height:1.55;">인센티브 1원당 절감 효과 3.4원 — 지급 확대가 남는 투자예요.</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--blue-600);">보험료 협상 카드</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;line-height:1.55;">위험 이벤트 28% 감소 — DTG 데이터로 갱신 시 보험료 인하 협상이 가능해요.</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--success);">ESG 실적</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;line-height:1.55;">연 감축 실적은 시 평가·재정지원 가점과 KOC 크레딧 수익으로 이어져요.</div>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div class="exec-section" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:11.5px;font-weight:500;color:var(--text-placeholder);">산정 기준 — 경유 1,550원/L · 절감량은 도입 전 12개월 베이스라인 대비 실측 (OBD·DTG 교차 검증)</span>
+      <a href="탄소중립 대시보드.dc.html" style="font-size:11.5px;font-weight:600;color:var(--text-placeholder);flex:none;">← 관제 대시보드로 (데모)</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const bench = [
+      { name: "세운버스(주)", pct: "-5.8%", w: 100, me: true },
+      { name: "세진교통(주)", pct: "-4.9%", w: 84 },
+      { name: "경북교통(주)", pct: "-4.1%", w: 71 },
+      { name: "신흥버스(주)", pct: "-3.6%", w: 62 },
+      { name: "동명교통(주)", pct: "-3.2%", w: 55 },
+    ].map(b => ({ ...b, me: !!b.me,
+      barStyle: { width: b.w + "%", height: "100%", borderRadius: 9999,
+        background: b.me ? "var(--success)" : "rgba(3,178,108,0.4)" } }));
+    return { bench };
+  }
+
+  componentDidMount() { this._iv = setInterval(() => this._tick(), 250); this._tick(); }
+  componentDidUpdate() { this._tick(); }
+  componentWillUnmount() {
+    clearInterval(this._iv);
+    if (this.charts) Object.values(this.charts).forEach(c => { try { c.destroy(); } catch (e) {} });
+  }
+
+  _tick() {
+    const C = window.Chart;
+    if (!C) return;
+    this.charts = this.charts || {};
+    C.defaults.font.family = "Pretendard Variable, Pretendard, sans-serif";
+    C.defaults.font.weight = 600;
+    C.defaults.color = "#8b95a1";
+    const saveEl = document.getElementById("e-save");
+    if (saveEl && !C.getChart("e-save")) {
+      this.charts["e-save"] = new C(saveEl, { type: "bar",
+        data: { labels: ["2월", "3월", "4월", "5월", "6월", "7월"],
+          datasets: [{ data: [612, 705, 798, 872, 963, 1065], backgroundColor: "#3182f6", borderRadius: 8, barPercentage: .55 }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { y: { grid: { color: "#f2f4f6" }, ticks: { callback: v => v + "만원" } }, x: { grid: { display: false } } } } });
+    }
+    const distEl = document.getElementById("e-dist");
+    if (distEl && !C.getChart("e-dist")) {
+      this.charts["e-dist"] = new C(distEl, { type: "doughnut",
+        data: { labels: ["우수", "일반", "교육 대상"],
+          datasets: [{ data: [21, 85, 9], backgroundColor: ["#03b26c", "#3182f6", "#fe9800"], borderWidth: 0 }] },
+        options: { cutout: "68%", maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+    }
+  }
+}
+</script>
+</body>
+</html>
