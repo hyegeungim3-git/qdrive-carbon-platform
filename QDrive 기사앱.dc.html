@@ -7,6 +7,29 @@
 <title>QDrive 기사앱 — 실시간 AI 코칭</title>
 <meta name="description" content="8인치 태블릿용 기사앱 프로토타입 — 내비형 실시간 코칭과 운행 리포트">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
+<script>
+/* 테마 부트스트랩 — 기사 야간 운행 대비 (localStorage → 시스템 설정) */
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem("qdrive_theme"); } catch (e) {}
+  var t = saved || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t;
+  addEventListener("DOMContentLoaded", function () {
+    var b = document.createElement("button");
+    b.id = "qd-theme";
+    b.setAttribute("aria-label", "라이트/다크 테마 전환");
+    b.textContent = t === "dark" ? "☀️" : "🌙";
+    b.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:9990;width:44px;height:44px;border-radius:50%;border:1px solid var(--border,#e5e8eb);background:var(--card,#fff);font-size:17px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);";
+    b.onclick = function () {
+      t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem("qdrive_theme", t); } catch (e) {}
+      b.textContent = t === "dark" ? "☀️" : "🌙";
+    };
+    document.body.appendChild(b);
+  });
+})();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -24,9 +47,22 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
+    :root{--card:#ffffff;--chart-grid:#f2f4f6;--overlay:var(--overlay);--app-bg:#e8ebef;}
+    html[data-theme="dark"]{
+      color-scheme:dark;
+      --background:#12161d;--surface:#12161d;--surface-raised:#1b212b;
+      --card:#1b212b;--overlay:rgba(27,33,43,0.92);--app-bg:#0c0f14;
+      --text-strong:#f2f4f6;--text-default:#dfe3e8;--text-body:#aeb6c0;
+      --text-secondary:#8b95a1;--text-placeholder:#5d6673;
+      --primary-weak:rgba(49,130,246,0.18);--link:#64a8ff;--blue-600:#64a8ff;
+      --border:#2b323d;--border-strong:#39424f;--divider:#232a34;
+      --grey-50:#20262f;--grey-100:#262d38;--grey-200:#333d4b;--grey-300:#455061;--grey-400:#6b7684;
+      --chart-grid:#242b35;
+      --shadow-standard:0 1px 4px rgba(0,0,0,0.5);
+    }
     *{box-sizing:border-box;}
     html,body{margin:0;padding:0;}
-    body{font-family:var(--font-sans);background:#e8ebef;-webkit-font-smoothing:antialiased;}
+    body{font-family:var(--font-sans);background:var(--app-bg);-webkit-font-smoothing:antialiased;}
     a{color:var(--link);text-decoration:none;}
     a:hover{color:var(--primary);}
     @keyframes ecoFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
@@ -49,7 +85,7 @@
     <div style="background:var(--surface);border-radius:22px;overflow:hidden;display:flex;height:790px;">
 
       <!-- left rail: nav -->
-      <div style="flex:none;width:96px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:18px 0;">
+      <div style="flex:none;width:96px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:18px 0;">
         <div style="width:46px;height:46px;border-radius:13px;background:var(--primary);display:flex;align-items:center;justify-content:center;margin-bottom:26px;">
           <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
         </div>
@@ -75,7 +111,7 @@
       <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
 
         <!-- slim header -->
-        <div style="flex:none;height:58px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;">
+        <div style="flex:none;height:58px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;">
           <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">{{ headerTitle }}</div>
           <span style="font-size:13px;font-weight:600;color:var(--text-secondary);">급행1 · 세운버스(주) · 4회차</span>
           <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
@@ -96,7 +132,7 @@
 
             <!-- col 1 : 속도 / 다음 정류장 / 간격 -->
             <div style="grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:14px;min-height:0;">
-              <div style="background:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);text-align:center;">
+              <div style="background:var(--card);border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);text-align:center;">
                 <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
                   <div>
                     <div style="font-size:64px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;color:var(--text-strong);">{{ speed }}</div>
@@ -124,7 +160,7 @@
               </div>
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div style="background:#fff;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-standard);text-align:center;">
+                <div style="background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-standard);text-align:center;">
                   <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">앞차</div>
                   <div style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;">11<span style="font-size:13px;font-weight:600;color:var(--text-body);margin-left:1px;">분</span></div>
                   <div style="font-size:12px;font-weight:700;color:var(--success);margin-top:2px;">정상</div>
@@ -136,7 +172,7 @@
                 </div>
               </div>
 
-              <div style="background:#fff;border-radius:16px;padding:16px 20px;box-shadow:var(--shadow-standard);flex:1;display:flex;flex-direction:column;justify-content:center;gap:11px;">
+              <div style="background:var(--card);border-radius:16px;padding:16px 20px;box-shadow:var(--shadow-standard);flex:1;display:flex;flex-direction:column;justify-content:center;gap:11px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
                   <span style="font-size:13px;font-weight:600;color:var(--text-secondary);">정시율</span>
                   <span style="font-size:15px;font-weight:700;color:var(--success);">+40초 여유</span>
@@ -149,8 +185,8 @@
             </div>
 
             <!-- col 2 : nav map (main stage) -->
-            <div style="grid-column:2;grid-row:1 / 3;background:#fff;border-radius:16px;box-shadow:var(--shadow-standard);overflow:hidden;position:relative;min-height:0;">
-              <div id="nav-map" style="position:absolute;inset:0;z-index:0;background:#eef1f5;"></div>
+            <div style="grid-column:2;grid-row:1 / 3;background:var(--card);border-radius:16px;box-shadow:var(--shadow-standard);overflow:hidden;position:relative;min-height:0;">
+              <div id="nav-map" style="position:absolute;inset:0;z-index:0;background:var(--grey-100);"></div>
 
               <!-- top: nav instruction banner -->
               <div style="position:absolute;top:12px;left:12px;right:12px;z-index:1000;background:var(--grey-900);border-radius:14px;padding:14px 16px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.25);">
@@ -171,7 +207,7 @@
 
               <!-- bottom: latest AI coaching toast -->
               <div style="position:absolute;bottom:12px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:8px;">
-                <div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-radius:12px;padding:11px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.14);display:flex;align-items:center;gap:11px;">
+                <div style="background:var(--overlay);backdrop-filter:blur(8px);border-radius:12px;padding:11px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.14);display:flex;align-items:center;gap:11px;">
                   <div style="width:30px;height:30px;border-radius:9px;background:rgba(3,178,108,0.12);color:var(--success);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg></div>
                   <div style="flex:1;min-width:0;">
                     <div style="font-size:13px;font-weight:700;">부드러운 감속, 좋아요</div>
@@ -179,7 +215,7 @@
                   </div>
                   <span style="font-size:11px;font-weight:600;color:var(--text-placeholder);font-variant-numeric:tabular-nums;">14:03</span>
                 </div>
-                <div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-radius:12px;padding:11px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.14);display:flex;align-items:center;gap:11px;">
+                <div style="background:var(--overlay);backdrop-filter:blur(8px);border-radius:12px;padding:11px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.14);display:flex;align-items:center;gap:11px;">
                   <div style="width:30px;height:30px;border-radius:9px;background:rgba(254,152,0,0.14);color:var(--orange-500);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
                   <div style="flex:1;min-width:0;">
                     <div style="font-size:13px;font-weight:700;">뒷차 간격 6분 — 정속 유지</div>
@@ -190,13 +226,13 @@
               </div>
 
               <!-- LIVE badge -->
-              <div style="position:absolute;top:86px;right:12px;z-index:1000;background:rgba(255,255,255,0.95);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.12);display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--primary);">
+              <div style="position:absolute;top:86px;right:12px;z-index:1000;background:var(--overlay);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.12);display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--primary);">
                 <span style="width:7px;height:7px;border-radius:50%;background:var(--primary);animation:livePulse 1.6s infinite;"></span>AI 코칭 LIVE
               </div>
             </div>
 
             <!-- bottom strip : 오늘 요약 + 미션 -->
-            <div style="grid-column:1;grid-row:2;background:#fff;border-radius:14px;padding:14px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;gap:9px;">
+            <div style="grid-column:1;grid-row:2;background:var(--card);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;gap:9px;">
               <div style="display:flex;align-items:baseline;justify-content:space-between;">
                 <span style="font-size:12.5px;font-weight:600;color:var(--text-secondary);">오늘 점수</span>
                 <span><span style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">96.2</span> <span style="font-size:12px;font-weight:700;color:var(--success);">▲ +0.6</span></span>
@@ -224,17 +260,17 @@
           <div class="app-page" style="display:flex;flex-direction:column;gap:14px;">
 
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-              <div style="background:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);">
                 <div style="font-size:13px;font-weight:600;color:var(--text-secondary);">이번 주 주행</div>
                 <div style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;">642<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">km</span></div>
                 <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:6px;">22회차 운행</div>
               </div>
-              <div style="background:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);">
                 <div style="font-size:13px;font-weight:600;color:var(--text-secondary);">평균 연비</div>
                 <div style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--primary);">3.3<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">km/L</span></div>
                 <div style="font-size:12px;font-weight:600;color:var(--success);margin-top:6px;">▲ 회사 평균보다 +8%</div>
               </div>
-              <div style="background:#fff;border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:18px 22px;box-shadow:var(--shadow-standard);">
                 <div style="font-size:13px;font-weight:600;color:var(--text-secondary);">이번 주 탄소 절감</div>
                 <div style="font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--success);">38.2<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">kg</span></div>
                 <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:6px;">연료 14.3L 절감 환산</div>
@@ -242,11 +278,11 @@
             </div>
 
             <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;">
-              <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
                 <div style="font-size:16px;font-weight:700;margin-bottom:14px;">주간 연비 추이</div>
                 <div style="position:relative;height:200px;"><canvas id="a-fuel"></canvas></div>
               </div>
-              <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
                 <div style="font-size:16px;font-weight:700;margin-bottom:12px;">운행 기록</div>
                 <div style="display:flex;flex-direction:column;">
                   <sc-for list="{{ trips }}" as="t" hint-placeholder-count="4">
@@ -268,7 +304,7 @@
 
             <!-- 게이미피케이션: 주간 랭킹 + 배지 -->
             <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:14px;">
-              <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                   <div style="font-size:16px;font-weight:700;">이번 주 사내 랭킹</div>
                   <span style="font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:4px 10px;border-radius:9999px;">세운버스(주)</span>
@@ -285,7 +321,7 @@
                 </div>
                 <div style="border-top:1px solid var(--divider);margin-top:12px;padding-top:10px;font-size:12px;font-weight:600;color:var(--text-secondary);">이번 주 1위 유지 시 <b style="color:var(--success);">인센티브 +80,000원</b></div>
               </div>
-              <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+              <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                   <div style="font-size:16px;font-weight:700;">내 배지</div>
                   <span style="font-size:12px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:4px 10px;border-radius:9999px;">4 / 6 획득</span>
@@ -303,7 +339,7 @@
             </div>
 
             <!-- 퍼스널 인사이트: 내 데이터가 찾아낸 나 -->
-            <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+            <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 <div style="font-size:16px;font-weight:700;">AI가 발견한 나의 패턴</div>
                 <span style="font-size:12px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,0.1);padding:4px 10px;border-radius:9999px;">3개월 데이터 분석</span>
@@ -328,7 +364,7 @@
               </div>
             </div>
 
-            <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+            <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                 <div style="font-size:16px;font-weight:700;">개선 포인트</div>
                 <span style="font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:4px 10px;border-radius:9999px;">AI 코칭</span>
@@ -417,7 +453,7 @@ class Component extends DCLogic {
       { icon: "💤", name: "공회전 제로", cond: "주 5일 무공회전 · 4/5일째", got: false },
       { icon: "🏆", name: "월간 MVP", cond: "월 종합 1위 · 이번 달 도전", got: false },
     ].map(b => ({ ...b, cardStyle: { padding: "13px 12px", border: "1px solid var(--border)", borderRadius: 12,
-      textAlign: "center", background: b.got ? "#fff" : "var(--grey-50)",
+      textAlign: "center", background: b.got ? "var(--card)" : "var(--grey-50)",
       opacity: b.got ? 1 : 0.62, filter: b.got ? "none" : "grayscale(0.9)" } }));
 
     const tips = [
@@ -452,13 +488,14 @@ class Component extends DCLogic {
     if (this.state.tab !== "home" || !window.L) return;
     const el = document.getElementById("nav-map");
     if (!el || !el.clientWidth) return;
-    if (this._map && this._map._container === el) return;
+    const mapTheme = document.documentElement.dataset.theme || "light";
+    if (this._map && this._map._container === el && this._mapTheme === mapTheme) return;
     if (this._map) { try { this._map.remove(); } catch (e) {} this._map = null; }
     const L = window.L;
     if (el._leaflet_id) { delete el._leaflet_id; el.innerHTML = ""; }
     const map = L.map(el, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false });
     map.setView([35.8680, 128.5985], 15);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/" + (mapTheme === "dark" ? "dark_all" : "light_all") + "/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);
 
     // 급행1 경로 (동대구역 → 반월당 → 서부정류장 방향)
     const route = [[35.8770, 128.6260], [35.8745, 128.6120], [35.8700, 128.6010], [35.8659, 128.5936], [35.8640, 128.5850], [35.8600, 128.5700]];
@@ -482,6 +519,7 @@ class Component extends DCLogic {
     L.marker([35.8755, 128.6180], { icon: busChip("뒷차 · 6분", "#fe9800"), interactive: false }).addTo(map);
 
     this._map = map;
+    this._mapTheme = mapTheme;
     setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 200);
   }
 
@@ -489,9 +527,10 @@ class Component extends DCLogic {
     this._tickNavMap();
     if (!window.Chart) return;
     const tab = this.state.tab;
-    if (tab !== "report") { this._painted = tab; return; }
+    const key = tab + "|" + (document.documentElement.dataset.theme || "light");
+    if (tab !== "report") { this._painted = key; return; }
     const missing = document.getElementById("a-fuel") && !window.Chart.getChart("a-fuel");
-    if (tab !== this._painted || missing) { this._destroy(); this._paint(); }
+    if (key !== this._painted || missing) { this._destroy(); this._paint(); }
   }
   _destroy() {
     if (this.charts) Object.values(this.charts).forEach(c => { try { c.destroy(); } catch (e) {} });
@@ -506,6 +545,8 @@ class Component extends DCLogic {
     C.defaults.font.weight = 600;
     C.defaults.color = "#8b95a1";
     const blue = "#3182f6";
+    const darkMode = (document.documentElement.dataset.theme || "light") === "dark";
+    const gridColor = darkMode ? "#242b35" : "#f2f4f6";
     setTimeout(() => {
       const el = document.getElementById("a-fuel");
       if (el) {
@@ -515,10 +556,10 @@ class Component extends DCLogic {
               backgroundColor: "rgba(49,130,246,.08)", fill: true, tension: .4, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: blue },
             { label: "회사 평균", data: [3.0, 3.0, 2.9, 3.1, 3.0, 3.1, 3.0], borderColor: "#b0b8c1",
               borderDash: [6, 5], tension: .4, borderWidth: 2, pointRadius: 0 } ] },
-          options: { maintainAspectRatio: false,
+          options: { maintainAspectRatio: false, animation: false,
             plugins: { legend: { position: "bottom", labels: { boxWidth: 12, boxHeight: 12, usePointStyle: true, padding: 16 } } },
-            scales: { y: { grid: { color: "#f2f4f6" }, ticks: { callback: v => v + "km/L" } }, x: { grid: { display: false } } } } });
-        this._painted = "report";
+            scales: { y: { grid: { color: gridColor }, ticks: { callback: v => v + "km/L" } }, x: { grid: { display: false } } } } });
+        this._painted = "report|" + (document.documentElement.dataset.theme || "light");
       }
     }, 30);
   }

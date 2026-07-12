@@ -6,6 +6,29 @@
 <title>QDrive — 탄소중립 관제 대시보드</title>
 <meta name="description" content="대구 시내버스 412대의 OBD·DTG 데이터로 안전운전 → 연료 절감 → 탄소 감축을 관리하는 관제 대시보드 프로토타입">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
+<script>
+/* 테마 부트스트랩 — localStorage → 시스템 설정 순. 첫 페인트 전에 적용해 플래시 방지 */
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem("qdrive_theme"); } catch (e) {}
+  var t = saved || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t;
+  addEventListener("DOMContentLoaded", function () {
+    var b = document.createElement("button");
+    b.id = "qd-theme";
+    b.setAttribute("aria-label", "라이트/다크 테마 전환");
+    b.textContent = t === "dark" ? "☀️" : "🌙";
+    b.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:9990;width:44px;height:44px;border-radius:50%;border:1px solid var(--border,#e5e8eb);background:var(--card,#fff);font-size:17px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);";
+    b.onclick = function () {
+      t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem("qdrive_theme", t); } catch (e) {}
+      b.textContent = t === "dark" ? "☀️" : "🌙";
+    };
+    document.body.appendChild(b);
+  });
+})();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -24,6 +47,20 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <style>
+    /* 테마 시맨틱 토큰 — 라이트 기본값 + 다크 오버라이드 (토스 토큰은 라이트 전용이라 별칭을 직접 뒤집는다) */
+    :root{--card:#ffffff;--chart-grid:#f2f4f6;--overlay:var(--overlay);}
+    html[data-theme="dark"]{
+      color-scheme:dark;
+      --background:#12161d;--surface:#12161d;--surface-raised:#1b212b;
+      --card:#1b212b;--overlay:rgba(27,33,43,0.9);
+      --text-strong:#f2f4f6;--text-default:#dfe3e8;--text-body:#aeb6c0;
+      --text-secondary:#8b95a1;--text-placeholder:#5d6673;
+      --primary-weak:rgba(49,130,246,0.18);--link:#64a8ff;--blue-600:#64a8ff;
+      --border:#2b323d;--border-strong:#39424f;--divider:#232a34;
+      --grey-50:#20262f;--grey-100:#262d38;--grey-200:#333d4b;--grey-300:#455061;--grey-400:#6b7684;
+      --chart-grid:#242b35;
+      --shadow-standard:0 1px 4px rgba(0,0,0,0.5);
+    }
     *{box-sizing:border-box;}
     html,body{margin:0;padding:0;}
     body{font-family:var(--font-sans);background:var(--surface);-webkit-font-smoothing:antialiased;}
@@ -49,7 +86,7 @@
 <div style="display:flex;height:100vh;height:100dvh;width:100%;overflow:hidden;color:var(--text-strong);">
 
   <!-- ============ SIDEBAR ============ -->
-  <aside style="width:248px;flex:none;height:100%;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;">
+  <aside style="width:248px;flex:none;height:100%;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;">
     <div style="padding:22px 20px 18px;display:flex;align-items:center;gap:10px;">
       <div style="width:34px;height:34px;border-radius:10px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
@@ -130,7 +167,7 @@
   <div style="flex:1;min-width:0;height:100%;display:flex;flex-direction:column;">
 
     <!-- topbar -->
-    <header style="flex:none;height:60px;background:rgba(255,255,255,0.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:16px;position:sticky;top:0;z-index:10;">
+    <header style="flex:none;height:60px;background:var(--overlay);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:16px;position:sticky;top:0;z-index:10;">
       <div style="min-width:0;">
         <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">{{ pageTitle }}</div>
         <div style="font-size:11.5px;color:var(--text-secondary);font-weight:500;">{{ pageSub }}</div>
@@ -150,14 +187,14 @@
           2026.07
         </div>
         <div style="position:relative;">
-          <button onClick="{{ toggleNotif }}" style="width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;color:var(--text-body);">
+          <button onClick="{{ toggleNotif }}" style="width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;color:var(--text-body);">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
             <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}">
               <span style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--red-500);border:1.5px solid #fff;"></span>
             </sc-if>
           </button>
           <sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="position:absolute;top:46px;right:0;width:344px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.14);z-index:60;overflow:hidden;">
+            <div style="position:absolute;top:46px;right:0;width:344px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.14);z-index:60;overflow:hidden;">
               <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--divider);">
                 <span style="font-size:14px;font-weight:700;">알림 <span style="color:var(--primary);">{{ notifCount }}</span></span>
                 <button onClick="{{ clearNotif }}" style="border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:700;color:var(--text-secondary);cursor:pointer;padding:4px 6px;border-radius:6px;">모두 읽음</button>
@@ -205,27 +242,27 @@
 
         <!-- KPI row -->
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">전체 차량</div>
             <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;">412<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">5개 운수회사</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">운행중</div>
             <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">356<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ 정상 운행</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">운휴</div>
             <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;">56<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">정비 12 · 대기 44</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">가동률</div>
             <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;">86.4<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">%</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ +1.2%p 전월</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">이상 알림</div>
             <div style="margin-top:8px;font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--red-500);">4<span style="font-size:15px;font-weight:600;color:var(--text-body);margin-left:2px;">건</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--red-500);">위험 1 · 주의 2 · 정보 1</div>
@@ -234,21 +271,21 @@
 
         <!-- AI strip : 운행 -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Insight</div>
               <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">세진 2044호 연비가 평소보다 23% 낮아요 — 인젝터 이상 패턴과 87% 일치해요.</div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Coach</div>
               <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">운행 전 점검을 권장해요. 사전 정비 시 돌발 결행을 월 3건 줄일 수 있어요.</div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:rgba(3,178,108,0.1);color:var(--success);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--success);">AI Forecast</div>
@@ -259,38 +296,38 @@
 
         <!-- map + fleet donut -->
         <div style="display:grid;grid-template-columns:1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;box-shadow:var(--shadow-standard);overflow:hidden;position:relative;min-height:400px;">
+          <div style="background:var(--card);border-radius:12px;box-shadow:var(--shadow-standard);overflow:hidden;position:relative;min-height:400px;">
             <div id="map-live" style="position:absolute;inset:0;z-index:0;background:#eef1f5;"></div>
 
             <!-- overlay: header -->
             <div style="position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:10px;z-index:1000;">
-              <div style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:10px;padding:9px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;">
+              <div style="background:var(--overlay);backdrop-filter:blur(6px);border-radius:10px;padding:9px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;">
                 실시간 차량 위치
                 <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--success);"><span style="width:7px;height:7px;border-radius:50%;background:var(--success);animation:livePulse 1.6s infinite;"></span>LIVE</span>
               </div>
             </div>
             <!-- overlay: legend -->
             <div style="position:absolute;bottom:14px;left:14px;display:flex;gap:8px;z-index:1000;">
-              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);"></span>운행 356</span>
-              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--success);"></span>친환경 118</span>
-              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--red-500);"></span>이상 1</span>
-              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--grey-400);"></span>운휴 56</span>
-              <span style="background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:7px;"><span style="width:34px;height:8px;border-radius:4px;background:linear-gradient(90deg,#3182f6,#fe9800,#f04452);"></span>급가속·급감속 히트맵</span>
+              <span style="background:var(--overlay);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--primary);"></span>운행 356</span>
+              <span style="background:var(--overlay);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--success);"></span>친환경 118</span>
+              <span style="background:var(--overlay);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--red-500);"></span>이상 1</span>
+              <span style="background:var(--overlay);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--grey-400);"></span>운휴 56</span>
+              <span style="background:var(--overlay);backdrop-filter:blur(6px);border-radius:9999px;padding:6px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:11.5px;font-weight:700;color:var(--text-body);display:inline-flex;align-items:center;gap:7px;"><span style="width:34px;height:8px;border-radius:4px;background:linear-gradient(90deg,#3182f6,#fe9800,#f04452);"></span>급가속·급감속 히트맵</span>
             </div>
             <!-- overlay: zoom -->
-            <div style="position:absolute;top:14px;right:14px;display:flex;flex-direction:column;background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.12);overflow:hidden;z-index:1000;">
-              <button onClick="{{ mapZoomIn }}" style="width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:17px;font-weight:600;color:var(--text-body);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:center;">+</button>
-              <button onClick="{{ mapZoomOut }}" style="width:34px;height:34px;border:none;background:#fff;cursor:pointer;font-size:17px;font-weight:600;color:var(--text-body);display:flex;align-items:center;justify-content:center;">−</button>
+            <div style="position:absolute;top:14px;right:14px;display:flex;flex-direction:column;background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.12);overflow:hidden;z-index:1000;">
+              <button onClick="{{ mapZoomIn }}" style="width:34px;height:34px;border:none;background:var(--card);cursor:pointer;font-size:17px;font-weight:600;color:var(--text-body);border-bottom:1px solid var(--divider);display:flex;align-items:center;justify-content:center;">+</button>
+              <button onClick="{{ mapZoomOut }}" style="width:34px;height:34px;border:none;background:var(--card);cursor:pointer;font-size:17px;font-weight:600;color:var(--text-body);display:flex;align-items:center;justify-content:center;">−</button>
             </div>
             <!-- overlay: attribution -->
-            <div style="position:absolute;bottom:6px;right:10px;font-size:10px;font-weight:500;color:#6b7684;z-index:1000;background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;">© OpenStreetMap · CARTO · QDrive</div>
+            <div style="position:absolute;bottom:6px;right:10px;font-size:10px;font-weight:500;color:var(--text-body);z-index:1000;background:var(--overlay);padding:2px 6px;border-radius:4px;">© OpenStreetMap · CARTO · QDrive</div>
           </div>
 
         </div>
 
         <!-- 계통별 + 노선별 -->
         <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:14px;">계통별 현황</div>
             <div style="display:flex;flex-direction:column;gap:14px;">
               <sc-for list="{{ systems }}" as="s" hint-placeholder-count="4">
@@ -307,7 +344,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
               <div style="font-size:16px;font-weight:700;">노선별 현황</div>
               <div style="display:flex;gap:6px;">
@@ -341,7 +378,7 @@
 
         <!-- 이상 알림 + AI 추천 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="font-size:16px;font-weight:700;">차량 이상 알림</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">OBD·DTG</span></div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4">
@@ -357,7 +394,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="font-size:16px;font-weight:700;">AI 추천</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">OBD·DTG 분석 · 신뢰도 94%</span></div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ recs }}" as="r" hint-placeholder-count="4">
@@ -384,7 +421,7 @@
       <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
 
         <!-- 핵심 성과 흐름 -->
-        <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:17px;font-weight:700;">{{ flowTitle }}</span>
@@ -429,7 +466,7 @@
         </div>
 
         <!-- 연비·전비 근거 -->
-        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
             <div style="font-size:15px;font-weight:700;">연비·전비 개선 — 도입 전 → 후</div>
             <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">OBD 연료분사량 × DTG 주행거리 교차 검증</span>
@@ -478,7 +515,7 @@
         </div>
 
         <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
               <div style="font-size:16px;font-weight:700;">{{ trendTitle }}</div>
               <div style="display:flex;gap:14px;font-size:12px;font-weight:600;color:var(--text-body);">
@@ -488,7 +525,7 @@
             </div>
             <div style="position:relative;height:260px;"><canvas id="c-trend"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
               <div style="font-size:16px;font-weight:700;">CO₂ 절감 예측</div>
               <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">AI · 향후 6개월</span>
@@ -498,15 +535,15 @@
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:16px;">계통별 CO₂ 절감 비교</div>
             <div style="position:relative;height:230px;"><canvas id="c-system"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:16px;">노선별 절감 TOP 5</div>
             <div style="position:relative;height:230px;"><canvas id="c-route"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:16px;">유종별 CO₂ 배출 구성</div>
             <div style="position:relative;height:190px;display:flex;align-items:center;justify-content:center;"><canvas id="c-fueltype"></canvas></div>
             <div style="display:flex;justify-content:space-around;margin-top:12px;font-size:12px;font-weight:600;">
@@ -519,7 +556,7 @@
 
         <!-- 안전운전 ↔ 연비 상관 + 운수회사별 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
               <div style="font-size:16px;font-weight:700;">안전운전 점수 ↔ 연비 상관</div>
               <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">차량 412대 · 상관계수 r = 0.81</span>
@@ -527,7 +564,7 @@
             <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">안전점수 10점 상승 시 연비 +0.11 km/L — 안전운전이 곧 절감이라는 근거예요.</div>
             <div style="position:relative;height:230px;"><canvas id="c-corr"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
               <div style="font-size:16px;font-weight:700;">운수회사별 절감 성과 (7월)</div>
               <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">베이스라인 대비 연료 절감률</span>
@@ -556,21 +593,21 @@
 
         <!-- AI strip : 탄소 -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Insight</div>
               <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">이번 달 절감의 62%는 공회전 감소(42→34분)에서 나왔어요.</div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Coach</div>
               <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">지선 356 정속 구간 코칭 시 월 1.9 tCO₂를 더 줄일 수 있어요.</div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:rgba(3,178,108,0.1);color:var(--success);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--success);">AI Forecast</div>
@@ -590,7 +627,7 @@
       <sc-if value="{{ isDash3 }}" hint-placeholder-val="{{ true }}">
       <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
         <div style="display:grid;grid-template-columns:300px 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
             <div style="font-size:16px;font-weight:700;">평균 운전점수</div>
             <div style="position:relative;flex:1;min-height:170px;display:flex;align-items:flex-end;justify-content:center;">
               <canvas id="c-gauge"></canvas>
@@ -605,7 +642,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><span style="font-size:16px;font-weight:700;">위험 운전 이벤트</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">DTG</span></div>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
               <div style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
@@ -631,21 +668,21 @@
 
         <!-- AI strip : 안전 -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Insight</div>
               <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">위험 이벤트의 43%가 하위 12명에게 집중 — 급가속이 주 원인이에요.</div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:var(--primary-weak);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--blue-600);">AI Coach</div>
               <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:3px;line-height:1.5;">한지훈·오세영 기사에게 출발 가속 코칭을 배정하면 점수 +4점이 기대돼요.</div>
             </div>
           </div>
-          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;">
             <div style="width:34px;height:34px;border-radius:10px;background:rgba(240,68,82,0.08);color:var(--red-500);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg></div>
             <div style="min-width:0;">
               <div style="font-size:12px;font-weight:700;color:var(--red-500);">AI Forecast</div>
@@ -656,7 +693,7 @@
 
         <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:12px;">
           <div style="display:flex;flex-direction:column;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:14px;">기사 랭킹</div>
             <div style="display:flex;flex-direction:column;gap:6px;">
               <sc-for list="{{ drivers }}" as="d" hint-placeholder-count="5">
@@ -672,7 +709,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:16px;font-weight:700;">위험 구간</span><span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">AI 탐지</span></div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <sc-for list="{{ zones }}" as="z" hint-placeholder-count="3">
@@ -689,7 +726,7 @@
           </div>
           </div>
 
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:14px;">차량별 안전 점수</div>
             <table style="width:100%;border-collapse:collapse;">
               <thead><tr>
@@ -723,22 +760,22 @@
       <sc-if value="{{ isPageV }}" hint-placeholder-val="{{ false }}">
       <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">등록 차량</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">412<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">이번 달 신규 6대</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">정비중</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange-500);">12<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">대</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">금일 출고 예정 4대</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">예지정비 알림</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--red-500);">5<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">건</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--red-500);">고장 예측 30일 이내</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">평균 차령</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">5.8<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">년</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">교체 권장 21대</div>
@@ -746,7 +783,7 @@
         </div>
 
         <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;">
               <div style="font-size:16px;font-weight:700;">차량 조회</div>
               <div style="display:flex;gap:8px;align-items:center;">
@@ -790,7 +827,7 @@
           </div>
 
           <div style="display:flex;flex-direction:column;gap:16px;">
-            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
               <div style="font-size:16px;font-weight:700;margin-bottom:6px;">차량 상태</div>
               <div style="position:relative;height:170px;display:flex;align-items:center;justify-content:center;">
                 <canvas id="c-vstatus"></canvas>
@@ -801,7 +838,7 @@
                 <span style="color:var(--text-secondary);">● 대기 44</span>
               </div>
             </div>
-            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);flex:1;">
+            <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);flex:1;">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                 <div style="font-size:16px;font-weight:700;">AI 예지정비</div>
                 <span style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">고장 예측</span>
@@ -822,7 +859,7 @@
           </div>
         </div>
 
-        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
           <div style="font-size:16px;font-weight:700;margin-bottom:14px;">최근 정비 이력</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
             <sc-for list="{{ fixLogs }}" as="f" hint-placeholder-count="3">
@@ -844,22 +881,22 @@
       <sc-if value="{{ isPageD }}" hint-placeholder-val="{{ false }}">
       <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">등록 기사</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">486<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">명</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">5개 운수회사</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">평균 운전점수</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--primary);">82.4<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">점</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ +2.1점 전월대비</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">교육 대상</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange-500);">23<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">명</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">70점 미만 · AI 선별</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">우수 기사</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--success);">64<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">명</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">90점 이상 · 인센티브 대상</div>
@@ -867,7 +904,7 @@
         </div>
 
         <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
               <div style="font-size:16px;font-weight:700;">기사 관리</div>
               <div style="display:flex;gap:6px;">
@@ -899,7 +936,7 @@
           </div>
 
           <div style="display:flex;flex-direction:column;gap:16px;">
-            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
                 <div style="font-size:16px;font-weight:700;">교육 대상 · AI 선별</div>
               </div>
@@ -916,7 +953,7 @@
               </div>
               <button onClick="{{ onAssignEdu }}" style="width:100%;height:40px;margin-top:14px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">교육 과정 배정하기</button>
             </div>
-            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);flex:1;">
+            <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);flex:1;">
               <div style="font-size:16px;font-weight:700;margin-bottom:12px;">성과 관리</div>
               <div style="display:flex;flex-direction:column;gap:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -944,22 +981,22 @@
       <sc-if value="{{ isPageR }}" hint-placeholder-val="{{ false }}">
       <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">운영 노선</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">128<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">개</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">급행 12 · 간선 58 · 지선 46 · 순환 12</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">일 평균 운행</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">4,820<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">회</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">일 주행 68,400km</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">평균 정시율</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;">87.2<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">%</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--success);">▲ +0.8%p 전월대비</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:13px;color:var(--text-secondary);font-weight:600;">저효율 노선</div>
             <div style="margin-top:8px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--orange-500);">9<span style="font-size:14px;font-weight:600;color:var(--text-body);margin-left:2px;">개</span></div>
             <div style="margin-top:8px;font-size:12px;font-weight:600;color:var(--text-secondary);">AI 개편 검토 권장</div>
@@ -967,17 +1004,17 @@
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:16px;">노선 효율 (연료 L/100km)</div>
             <div style="position:relative;height:240px;"><canvas id="c-reff"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:16px;font-weight:700;margin-bottom:16px;">계통별 수송 인원 (월)</div>
             <div style="position:relative;height:240px;"><canvas id="c-rpax"></canvas></div>
           </div>
         </div>
 
-        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
           <div style="font-size:16px;font-weight:700;margin-bottom:14px;">노선별 통계</div>
           <table style="width:100%;border-collapse:collapse;">
             <thead><tr>
@@ -1006,7 +1043,7 @@
         </div>
 
         <!-- 데이터 기반 정책 제안 -->
-        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
             <div style="font-size:16px;font-weight:700;">데이터 기반 정책 제안</div>
             <span style="font-size:11px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:3px 8px;border-radius:9999px;">버스 데이터로 도시가 좋아져요</span>
@@ -1035,7 +1072,7 @@
       <div class="eco-page" style="display:flex;flex-direction:column;gap:12px;">
 
         <!-- 전환 시뮬레이터 -->
-        <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:12px;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:17px;font-weight:700;">전기버스 전환 시뮬레이터</span>
@@ -1082,7 +1119,7 @@
 
         <!-- 감축 곡선 + AI 선정 대상 -->
         <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
               <div style="font-size:16px;font-weight:700;">전환 규모별 연 감축량 곡선</div>
               <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">● 현재 계획 지점</span>
@@ -1090,7 +1127,7 @@
             <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">효과 큰 차량부터 전환하므로 대수가 늘수록 대당 감축 효과는 점차 줄어요 — 한계 효과를 보고 규모를 정하세요.</div>
             <div style="position:relative;height:250px;"><canvas id="c-plan"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
               <div style="font-size:16px;font-weight:700;">AI 선정 전환 대상</div>
               <span style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">효과순 TOP 5</span>
@@ -1111,7 +1148,7 @@
         </div>
 
         <!-- V2G 시뮬레이터 (미래 비전 H2 미리보기) -->
-        <div style="background:#fff;border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-standard);">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">
             <span style="font-size:17px;font-weight:700;">V2G — 버스가 발전소가 되는 시간</span>
             <span style="font-size:12px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,0.1);padding:4px 10px;border-radius:9999px;">미래 비전 H2 미리보기</span>
@@ -1159,13 +1196,13 @@
 
         <!-- 충전 · 재원 · 크레딧 -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:15px;font-weight:700;margin-bottom:12px;">충전 스케줄 최적화</div>
             <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px;"><span style="color:var(--text-body);">심야 경부하(23~09시) 충전 비중</span><span style="font-variant-numeric:tabular-nums;">41% → <b style="color:var(--primary);">68%</b></span></div>
             <div style="height:8px;border-radius:9999px;background:var(--grey-100);overflow:hidden;margin-bottom:12px;"><div style="width:68%;height:100%;border-radius:9999px;background:var(--primary);"></div></div>
             <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);line-height:1.6;">kWh당 62원 절감 — 현 전기 68대 기준 <b style="color:var(--text-strong);">월 940만원</b>, 전환 확대 시 비례 증가해요.</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:15px;font-weight:700;margin-bottom:12px;">보조금 · 재원</div>
             <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;">
               <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-body);">대당 차량가 (대형 전기버스)</span><span style="font-variant-numeric:tabular-nums;">3.9억원</span></div>
@@ -1175,7 +1212,7 @@
             </div>
             <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:10px;">2026년 시 배정 물량 잔여 <b style="color:var(--text-strong);">28대</b> — 신청 마감 9월.</div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
               <div style="font-size:15px;font-weight:700;">감축 실적의 수익화</div>
               <span style="font-size:11px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:3px 8px;border-radius:9999px;">외부사업 KOC</span>
@@ -1187,7 +1224,7 @@
 
         <!-- 데이터 플라이휠 -->
         <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
               <div style="font-size:16px;font-weight:700;">데이터가 쌓일수록, AI가 정확해져요</div>
               <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">데이터 플라이휠</span>
@@ -1195,7 +1232,7 @@
             <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">도입 후 6개월, 누적 주행 1,620만km가 학습 데이터가 됐어요 — 예지정비 적중률이 62%에서 91%까지 올랐어요. 이 축적은 후발 주자가 따라올 수 없는 해자예요.</div>
             <div style="position:relative;height:190px;"><canvas id="c-fly"></canvas></div>
           </div>
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="font-size:15px;font-weight:700;margin-bottom:12px;">다음 6개월, 데이터가 열어줄 것들</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <div style="padding:12px 14px;background:var(--grey-50);border-radius:10px;">
@@ -1221,7 +1258,7 @@
       <div class="eco-page" style="display:grid;grid-template-columns:1fr 1.5fr;gap:12px;align-items:start;">
 
         <!-- 보고서 목록 -->
-        <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
             <div style="font-size:16px;font-weight:700;">보고서</div>
             <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">운영 데이터 자동 생성</span>
@@ -1241,7 +1278,7 @@
         </div>
 
         <!-- 미리보기 -->
-        <div style="background:#fff;border-radius:12px;padding:20px 22px;box-shadow:var(--shadow-standard);">
+        <div style="background:var(--card);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow-standard);">
           <sc-if value="{{ repPending }}" hint-placeholder-val="{{ false }}">
             <div style="padding:60px 20px;text-align:center;">
               <div style="font-size:15px;font-weight:700;color:var(--text-body);">아직 생성되지 않은 보고서예요</div>
@@ -1255,7 +1292,7 @@
                 <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:3px;">{{ repPeriod }} · 대구광역시 제출용 · QDrive 자동 생성</div>
               </div>
               <div style="display:flex;gap:8px;flex:none;">
-                <button onClick="{{ onExportPdf }}" style="height:36px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-body);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">PDF 내보내기</button>
+                <button onClick="{{ onExportPdf }}" style="height:36px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text-body);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">PDF 내보내기</button>
                 <button onClick="{{ onSubmitGov }}" style="height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">지자체 제출</button>
               </div>
             </div>
@@ -1308,7 +1345,7 @@
         <!-- 에이전트 4 카드 -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
           <sc-for list="{{ agents }}" as="g" hint-placeholder-count="4">
-            <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+            <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
               <div style="display:flex;align-items:center;gap:10px;">
                 <div style="{{ g.iconStyle }}">{{ g.icon }}</div>
                 <div style="min-width:0;">
@@ -1327,7 +1364,7 @@
 
         <!-- 승인 대기 + 코파일럿 -->
         <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:12px;align-items:start;">
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
               <div style="font-size:16px;font-weight:700;">승인 대기</div>
               <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">사람이 결정해요</span>
@@ -1344,7 +1381,7 @@
                   <sc-if value="{{ p.pending }}" hint-placeholder-val="{{ true }}">
                     <div style="display:flex;gap:8px;margin-top:11px;">
                       <button onClick="{{ p.onOk }}" style="flex:1;height:36px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">승인</button>
-                      <button onClick="{{ p.onHold }}" style="flex:1;height:36px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--text-body);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">보류</button>
+                      <button onClick="{{ p.onHold }}" style="flex:1;height:36px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text-body);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">보류</button>
                     </div>
                   </sc-if>
                   <sc-if value="{{ p.decided }}" hint-placeholder-val="{{ false }}">
@@ -1355,7 +1392,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
+          <div style="background:var(--card);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-standard);display:flex;flex-direction:column;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
               <div style="font-size:16px;font-weight:700;">코파일럿에게 물어보기</div>
               <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">조회·분석 단계 공개</span>
@@ -1363,16 +1400,16 @@
               <sc-if value="{{ liveOn }}" hint-placeholder-val="{{ false }}">
                 <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.1);padding:4px 10px;border-radius:9999px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);animation:livePulse 1.6s infinite;"></span>라이브 AI</span>
               </sc-if>
-              <button onClick="{{ toggleKeyPanel }}" style="height:28px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-body);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none;">{{ keyBtnLabel }}</button>
+              <button onClick="{{ toggleKeyPanel }}" style="height:28px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text-body);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;flex:none;">{{ keyBtnLabel }}</button>
             </div>
             <sc-if value="{{ showKeyPanel }}" hint-placeholder-val="{{ false }}">
               <div style="background:var(--grey-50);border-radius:12px;padding:13px 15px;margin-bottom:12px;">
                 <div style="font-size:12px;font-weight:600;color:var(--text-body);line-height:1.6;">Anthropic API 키를 연결하면 자유 질문에 실제 Claude(claude-opus-4-8)가 이 화면의 운영 데이터를 근거로 답해요.<br><b>키는 이 브라우저의 localStorage에만 저장</b>되고, Anthropic API로만 전송돼요.</div>
                 <div style="display:flex;gap:8px;margin-top:10px;">
-                  <input type="password" onChange="{{ onKeyDraft }}" value="{{ keyDraft }}" placeholder="sk-ant-..." style="flex:1;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:600;outline:none;background:#fff;color:var(--text-strong);">
+                  <input type="password" onChange="{{ onKeyDraft }}" value="{{ keyDraft }}" placeholder="sk-ant-..." style="flex:1;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:9px;font-family:inherit;font-size:12.5px;font-weight:600;outline:none;background:var(--card);color:var(--text-strong);">
                   <button onClick="{{ onKeySave }}" style="height:36px;padding:0 14px;border:none;border-radius:9px;background:var(--primary);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">연결</button>
                   <sc-if value="{{ liveOn }}" hint-placeholder-val="{{ false }}">
-                    <button onClick="{{ onKeyClear }}" style="height:36px;padding:0 14px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--red-500);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">해제</button>
+                    <button onClick="{{ onKeyClear }}" style="height:36px;padding:0 14px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--red-500);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;">해제</button>
                   </sc-if>
                 </div>
               </div>
@@ -1403,7 +1440,7 @@
               </sc-for>
             </div>
             <div style="display:flex;gap:8px;margin-top:10px;">
-              <input onChange="{{ onAgentQ }}" value="{{ agentQ }}" placeholder="자유롭게 물어보세요 (데모)" style="flex:1;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text-strong);background:#fff;">
+              <input onChange="{{ onAgentQ }}" value="{{ agentQ }}" placeholder="자유롭게 물어보세요 (데모)" style="flex:1;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;outline:none;color:var(--text-strong);background:var(--card);">
               <button onClick="{{ onAgentSend }}" style="height:40px;padding:0 16px;border:none;border-radius:10px;background:var(--grey-900);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">전송</button>
             </div>
           </div>
@@ -1545,7 +1582,7 @@ class Component extends DCLogic {
   // 필터 chip 공통 스타일 (노선/기사 필터에서 공용)
   chipStyle(active) {
     return { appearance: "none", border: active ? "1px solid var(--primary)" : "1px solid var(--border)",
-      background: active ? "var(--primary-weak)" : "#fff", color: active ? "var(--primary)" : "var(--text-body)",
+      background: active ? "var(--primary-weak)" : "var(--card)", color: active ? "var(--primary)" : "var(--text-body)",
       fontFamily: "inherit", fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 9999, cursor: "pointer" };
   }
 
@@ -1641,7 +1678,7 @@ class Component extends DCLogic {
         style: { appearance: "none", border: "none", fontFamily: "inherit", fontSize: 12,
           fontWeight: active ? 700 : 600, padding: "6px 12px", borderRadius: 8, cursor: "pointer",
           color: active ? "var(--text-strong)" : "var(--text-secondary)",
-          background: active ? "#fff" : "transparent",
+          background: active ? "var(--card)" : "transparent",
           boxShadow: active ? "0 1px 3px rgba(0,0,0,.06)" : "none" } };
     });
     const P = this.periodData();
@@ -1871,7 +1908,7 @@ class Component extends DCLogic {
       onClick: () => this.setState({ repSel: i }),
       style: { display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "12px 13px",
         border: i === repSel ? "1px solid var(--primary)" : "1px solid var(--border)", borderRadius: 12,
-        background: i === repSel ? "var(--primary-weak)" : "#fff", cursor: "pointer", fontFamily: "inherit" } }));
+        background: i === repSel ? "var(--primary-weak)" : "var(--card)", cursor: "pointer", fontFamily: "inherit" } }));
     const rep = reportsRaw[repSel];
 
     const routeStats = [
@@ -2014,7 +2051,7 @@ class Component extends DCLogic {
     const ids = this._canvasIds(dash);
     const sentinel = ids[0];
     const missing = sentinel && document.getElementById(sentinel) && !window.Chart.getChart(sentinel);
-    if (dash + "|" + this.state.period + "|" + this.state.planN + "|" + this.state.v2gN !== this._painted || missing) {
+    if (dash + "|" + this.state.period + "|" + this.state.planN + "|" + this.state.v2gN + "|" + (document.documentElement.dataset.theme || "light") !== this._painted || missing) {
       this._destroy();
       this._paint();
     }
@@ -2030,14 +2067,15 @@ class Component extends DCLogic {
     const el = document.getElementById("map-live");
     // 레이아웃 확정 전(폭 0) 생성하면 heat 레이어가 IndexSizeError로 죽고 컨테이너가 초기화 실패 상태로 고착된다
     if (!el || !el.clientWidth) return;
-    if (this._map && this._map._container === el) return;
+    const mapTheme = document.documentElement.dataset.theme || "light";
+    if (this._map && this._map._container === el && this._mapTheme === mapTheme) return;
     if (this._map) { try { this._map.remove(); } catch (e) {} this._map = null; if (this._mapAnim) clearInterval(this._mapAnim); }
     const L = window.L;
     // remove()가 예외로 중단되면 컨테이너에 _leaflet_id와 옛 DOM이 남아 L.map()이 영구 실패한다 — 강제 초기화
     if (el._leaflet_id) { delete el._leaflet_id; el.innerHTML = ""; }
     const map = L.map(el, { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
     map.setView([35.8664, 128.5951], 13);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/" + (mapTheme === "dark" ? "dark_all" : "light_all") + "/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd" }).addTo(map);
 
     // 급가속·급감속 다발 지점 (핫스팟 중심 + 산포)
     const hotspots = [
@@ -2085,11 +2123,12 @@ class Component extends DCLogic {
 
     // 주요 지점 라벨
     const pill = (name) => L.divIcon({ className: "", iconAnchor: [0, 11],
-      html: '<div style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #e5e8eb;border-radius:9999px;padding:3px 9px;font-family:Pretendard Variable,Pretendard,sans-serif;font-size:11px;font-weight:700;color:#333d4b;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.1);">' + name + '</div>' });
+      html: '<div style="display:inline-flex;align-items:center;gap:5px;background:#ffffff;border:1px solid #e5e8eb;border-radius:9999px;padding:3px 9px;font-family:Pretendard Variable,Pretendard,sans-serif;font-size:11px;font-weight:700;color:#333d4b;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.1);">' + name + '</div>' });
     [[35.8659, 128.5936, "반월당"], [35.8770, 128.6260, "동대구역"], [35.8935, 128.5830, "만평 네거리"], [35.8563, 128.5622, "두류"]]
       .forEach(s => L.marker([s[0], s[1]], { icon: pill(s[2]), interactive: false }).addTo(map));
 
     this._map = map;
+    this._mapTheme = mapTheme;
     setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 200);
   }
   _paint() {
@@ -2099,12 +2138,14 @@ class Component extends DCLogic {
     C.defaults.font.family = "Pretendard Variable, Pretendard, sans-serif";
     C.defaults.font.weight = 600;
     C.defaults.color = "#8b95a1";
-    const blue = "#3182f6", green = "#03b26c", red = "#f04452", orange = "#fe9800", teal = "#18a5a5", faint = "#e5e8eb";
+    const darkMode = (document.documentElement.dataset.theme || "light") === "dark";
+    const blue = "#3182f6", green = "#03b26c", red = "#f04452", orange = "#fe9800", teal = "#18a5a5",
+      faint = darkMode ? "#333d4b" : "#e5e8eb";
     const mk = (id, cfg) => {
       const el = document.getElementById(id);
       if (el) this.charts[id] = new C(el, cfg);
     };
-    const grid = { color: "#f2f4f6" }, noGrid = { display: false };
+    const grid = { color: darkMode ? "#242b35" : "#f2f4f6" }, noGrid = { display: false };
     const noLegend = { legend: { display: false } };
     setTimeout(() => {
       const d = this.state.dash;
@@ -2208,7 +2249,7 @@ class Component extends DCLogic {
           datasets: [{ data: [128.4, 214.6, 96.2, 42.8], backgroundColor: blue, borderRadius: 8, barPercentage: .6 }] },
           options: { maintainAspectRatio: false, plugins: noLegend, scales: { y: { grid, ticks: { callback: v => v + "만명" } }, x: { grid: noGrid } } } });
       }
-      if (this._canvasIds(d).length === 0 || Object.keys(this.charts).length > 0) this._painted = d + "|" + this.state.period + "|" + this.state.planN + "|" + this.state.v2gN;
+      if (this._canvasIds(d).length === 0 || Object.keys(this.charts).length > 0) this._painted = d + "|" + this.state.period + "|" + this.state.planN + "|" + this.state.v2gN + "|" + (document.documentElement.dataset.theme || "light");
     }, 30);
   }
 }

@@ -10,6 +10,28 @@
 <meta property="og:title" content="대구 시내버스 탄소 리포트 — 오늘 아낀 탄소 2.1t">
 <meta property="og:description" content="기사님들의 안전운전이 만든 탄소 감축 — 올해 누적 393.7tCO₂, 소나무 59,600그루 효과. 내 노선의 친환경 등급도 확인해 보세요.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2303b26c'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
+<script>
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem("qdrive_theme"); } catch (e) {}
+  var t = saved || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t;
+  addEventListener("DOMContentLoaded", function () {
+    var b = document.createElement("button");
+    b.id = "qd-theme";
+    b.setAttribute("aria-label", "라이트/다크 테마 전환");
+    b.textContent = t === "dark" ? "☀️" : "🌙";
+    b.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:9990;width:44px;height:44px;border-radius:50%;border:1px solid var(--border,#e5e8eb);background:var(--card,#fff);font-size:17px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);";
+    b.onclick = function () {
+      t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem("qdrive_theme", t); } catch (e) {}
+      b.textContent = t === "dark" ? "☀️" : "🌙";
+    };
+    document.body.appendChild(b);
+  });
+})();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -25,6 +47,17 @@
   <script src="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/_ds_bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
+    :root{--card:#ffffff;--chart-grid:#f2f4f6;}
+    html[data-theme="dark"]{
+      color-scheme:dark;
+      --background:#12161d;--surface:#12161d;--surface-raised:#1b212b;--card:#1b212b;
+      --text-strong:#f2f4f6;--text-default:#dfe3e8;--text-body:#aeb6c0;
+      --text-secondary:#8b95a1;--text-placeholder:#5d6673;
+      --primary-weak:rgba(49,130,246,0.18);--link:#64a8ff;--blue-600:#64a8ff;
+      --border:#2b323d;--border-strong:#39424f;--divider:#232a34;
+      --grey-50:#20262f;--grey-100:#262d38;--grey-200:#333d4b;--grey-300:#455061;--grey-400:#6b7684;
+      --chart-grid:#242b35;
+    }
     *{box-sizing:border-box;}
     html,body{margin:0;padding:0;}
     body{font-family:var(--font-sans);background:var(--surface);-webkit-font-smoothing:antialiased;color:var(--text-strong);}
@@ -103,12 +136,12 @@
 
     <!-- 월별 추이 + 함께한 사람들 -->
     <div class="pub-section pub-grid-main">
-      <div style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
+      <div style="background:var(--card);border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);">
         <div style="font-size:17px;font-weight:700;">매달 조금씩, 꾸준히 줄고 있어요</div>
         <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-top:4px;">월별 CO₂ 감축량 (도입 전 대비 실측)</div>
         <div style="position:relative;height:240px;margin-top:16px;"><canvas id="p-month"></canvas></div>
       </div>
-      <div style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:14px;">
+      <div style="background:var(--card);border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);display:flex;flex-direction:column;gap:14px;">
         <div style="font-size:17px;font-weight:700;">함께 만든 사람들</div>
         <div style="display:flex;flex-direction:column;gap:12px;flex:1;justify-content:center;">
           <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:13.5px;font-weight:600;color:var(--text-body);">참여 버스</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;">412대</span></div>
@@ -121,7 +154,7 @@
     </div>
 
     <!-- 내 노선 조회 -->
-    <div class="pub-section" style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
+    <div class="pub-section" style="background:var(--card);border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <div style="font-size:17px;font-weight:700;">내가 타는 버스는 얼마나 친환경일까요?</div>
         <span style="font-size:12px;font-weight:700;color:#03965c;background:rgba(3,178,108,0.12);padding:4px 10px;border-radius:9999px;">노선별 효율 등급</span>
@@ -146,7 +179,7 @@
     </div>
 
     <!-- 나의 절감 계산기 -->
-    <div class="pub-section" style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
+    <div class="pub-section" style="background:var(--card);border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <div style="font-size:17px;font-weight:700;">나도 버스로 바꾸면, 얼마나 아낄까요?</div>
         <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:rgba(49,130,246,0.1);padding:4px 10px;border-radius:9999px;">승용차 대비 계산기</span>
@@ -172,7 +205,7 @@
     </div>
 
     <!-- 데이터가 바꾼 것들 -->
-    <div class="pub-section" style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
+    <div class="pub-section" style="background:var(--card);border-radius:16px;padding:22px 24px;box-shadow:0 6px 24px rgba(0,0,0,0.07);margin-top:14px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <div style="font-size:17px;font-weight:700;">여러분의 이용이 바꾼 것들</div>
         <span style="font-size:12px;font-weight:700;color:var(--blue-600);background:rgba(49,130,246,0.1);padding:4px 10px;border-radius:9999px;">데이터 → 서비스 개선</span>
@@ -273,7 +306,7 @@ class Component extends DCLogic {
         const active = i === this.state.route;
         return { label: r.name, onClick: () => this.setState({ route: i }),
           style: { appearance: "none", border: active ? "1px solid var(--primary)" : "1px solid var(--border)",
-            background: active ? "var(--primary-weak)" : "#fff", color: active ? "var(--primary)" : "var(--text-body)",
+            background: active ? "var(--primary-weak)" : "var(--card)", color: active ? "var(--primary)" : "var(--text-body)",
             fontFamily: "inherit", fontSize: 13, fontWeight: 700, padding: "12px 17px", minHeight: 44, borderRadius: 9999, cursor: "pointer" } };
       }),
       routeName: sel.name, routeSeg: sel.seg, routeDesc: sel.desc,
@@ -297,15 +330,19 @@ class Component extends DCLogic {
     const C = window.Chart;
     if (!C) return;
     const el = document.getElementById("p-month");
-    if (!el || C.getChart("p-month")) return;
+    const theme = document.documentElement.dataset.theme || "light";
+    if (!el) return;
+    if (C.getChart("p-month") && this._chartTheme === theme) return;
+    if (this._chart) { try { this._chart.destroy(); } catch (e) {} }
     C.defaults.font.family = "Pretendard Variable, Pretendard, sans-serif";
     C.defaults.font.weight = 600;
     C.defaults.color = "#8b95a1";
     this._chart = new C(el, { type: "bar",
       data: { labels: ["2월", "3월", "4월", "5월", "6월", "7월"],
         datasets: [{ data: [57.4, 61.1, 64.6, 67.5, 70.5, 72.6], backgroundColor: "#03b26c", borderRadius: 9, barPercentage: .55 }] },
-      options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
-        scales: { y: { grid: { color: "#f2f4f6" }, ticks: { callback: v => v + "t" } }, x: { grid: { display: false } } } } });
+      options: { maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } },
+        scales: { y: { grid: { color: theme === "dark" ? "#242b35" : "#f2f4f6" }, ticks: { callback: v => v + "t" } }, x: { grid: { display: false } } } } });
+    this._chartTheme = theme;
   }
 }
 </script>

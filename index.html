@@ -11,6 +11,28 @@
 <meta property="og:description" content="안전운전이 곧 탄소중립입니다 — 연비 +4.5%, 연 393.7tCO₂ 감축. 관제·기사·경영진·시민 4개 화면 라이브 데모.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233182f6'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/tokens/fonts.css">
+<script>
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem("qdrive_theme"); } catch (e) {}
+  var t = saved || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t;
+  addEventListener("DOMContentLoaded", function () {
+    var b = document.createElement("button");
+    b.id = "qd-theme";
+    b.setAttribute("aria-label", "라이트/다크 테마 전환");
+    b.textContent = t === "dark" ? "☀️" : "🌙";
+    b.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:9990;width:44px;height:44px;border-radius:50%;border:1px solid var(--line,#e5e8eb);background:var(--card,#fff);font-size:17px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);";
+    b.onclick = function () {
+      t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem("qdrive_theme", t); } catch (e) {}
+      b.textContent = t === "dark" ? "☀️" : "🌙";
+    };
+    document.body.appendChild(b);
+  });
+})();
+</script>
 <style>
   /* ===== 토큰 (이 페이지 전용 — 다크 히어로 + 라이트 본문) ===== */
   :root{
@@ -21,6 +43,12 @@
     --hero-ink:#f9fafb; --hero-ink-2:#b0b8c1; --hero-eco:#5ad598;
     --r-el:10px; --r-card:16px; --r-hero:24px;
     --sh-card:0 2px 10px rgba(0,0,0,.05); --sh-lift:0 10px 28px rgba(0,0,0,.10);
+  }
+  html[data-theme="dark"]{
+    color-scheme:dark;
+    --ink:#f2f4f6; --ink-2:#aeb6c0; --ink-3:#6b7684;
+    --bg:#12161d; --card:#1b212b; --line:#2b323d;
+    --sh-card:0 2px 10px rgba(0,0,0,.4); --sh-lift:0 10px 28px rgba(0,0,0,.5);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{scroll-behavior:smooth;}
@@ -69,7 +97,7 @@
   /* ===== 작동 원리 ===== */
   .how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
   .how-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px 22px;box-shadow:var(--sh-card);}
-  .how-num{position:absolute;top:20px;right:20px;font-size:32px;font-weight:800;color:var(--bg);letter-spacing:-1px;}
+  .how-num{position:absolute;top:20px;right:20px;font-size:32px;font-weight:800;color:var(--line);letter-spacing:-1px;}
   .how-ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
   .how-card h3{font-size:16.5px;font-weight:700;letter-spacing:-.2px;}
   .how-card p{font-size:13.5px;font-weight:500;color:var(--ink-2);margin-top:8px;line-height:1.65;}
@@ -82,7 +110,7 @@
   .scr-tag{display:inline-flex;font-size:11px;font-weight:700;padding:5px 11px;border-radius:9999px;margin-bottom:13px;}
   .t-blue{background:rgba(49,130,246,.1);color:var(--brand-strong);}
   .t-green{background:rgba(3,178,108,.1);color:var(--eco-deep);}
-  .t-dark{background:var(--ink);color:var(--hero-eco);}
+  .t-dark{background:#191f28;color:#5ad598;}
   .t-orange{background:rgba(254,152,0,.13);color:#c47600;}
   .scr h3{font-size:17.5px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
   .scr h3 svg{color:var(--ink-3);flex:none;}

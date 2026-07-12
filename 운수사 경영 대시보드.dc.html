@@ -6,6 +6,28 @@
 <title>세운버스(주) 경영 리포트 — QDrive</title>
 <meta name="description" content="운수회사 경영진용 대시보드 — 안전운전이 만든 비용 절감과 경영 효과를 한 화면에">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23191f28'/%3E%3Cpath d='M12.5 18.5A5 5 0 0 1 11.6 8.6C15.7 7.8 16.8 7.4 18.2 5.6c.7 1.4 1.4 3 1.4 5.7 0 3.9-3.4 7.2-7.1 7.2Z' fill='%237ee2a8'/%3E%3C/svg%3E">
+<script>
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem("qdrive_theme"); } catch (e) {}
+  var t = saved || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t;
+  addEventListener("DOMContentLoaded", function () {
+    var b = document.createElement("button");
+    b.id = "qd-theme";
+    b.setAttribute("aria-label", "라이트/다크 테마 전환");
+    b.textContent = t === "dark" ? "☀️" : "🌙";
+    b.style.cssText = "position:fixed;right:18px;bottom:18px;z-index:9990;width:44px;height:44px;border-radius:50%;border:1px solid var(--border,#e5e8eb);background:var(--card,#fff);font-size:17px;line-height:1;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);";
+    b.onclick = function () {
+      t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem("qdrive_theme", t); } catch (e) {}
+      b.textContent = t === "dark" ? "☀️" : "🌙";
+    };
+    document.body.appendChild(b);
+  });
+})();
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -21,6 +43,18 @@
   <script src="_ds/toss-design-system-247c4a0e-1ecf-4ef9-8202-7e83e2b585f4/_ds_bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
+    :root{--card:#ffffff;--chart-grid:#f2f4f6;}
+    html[data-theme="dark"]{
+      color-scheme:dark;
+      --background:#12161d;--surface:#12161d;--surface-raised:#1b212b;--card:#1b212b;
+      --text-strong:#f2f4f6;--text-default:#dfe3e8;--text-body:#aeb6c0;
+      --text-secondary:#8b95a1;--text-placeholder:#5d6673;
+      --primary-weak:rgba(49,130,246,0.18);--link:#64a8ff;--blue-600:#64a8ff;
+      --border:#2b323d;--border-strong:#39424f;--divider:#232a34;
+      --grey-50:#20262f;--grey-100:#262d38;--grey-200:#333d4b;--grey-300:#455061;--grey-400:#6b7684;
+      --chart-grid:#242b35;
+      --shadow-standard:0 1px 4px rgba(0,0,0,0.5);
+    }
     *{box-sizing:border-box;}
     html,body{margin:0;padding:0;}
     body{font-family:var(--font-sans);background:var(--surface);-webkit-font-smoothing:antialiased;color:var(--text-strong);}
@@ -98,12 +132,12 @@
 
     <!-- 추이 + 기사 분포 -->
     <div class="exec-section" style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px;">
-      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+      <div style="background:var(--card);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
         <div style="font-size:15.5px;font-weight:700;">월별 연료비 절감액</div>
         <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:3px;">도입(2월) 후 6개월 연속 증가 — 코칭 정착 효과예요.</div>
         <div style="position:relative;height:220px;margin-top:14px;"><canvas id="e-save"></canvas></div>
       </div>
-      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+      <div style="background:var(--card);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
         <div style="font-size:15.5px;font-weight:700;margin-bottom:6px;">기사 성과 분포</div>
         <div style="position:relative;height:170px;display:flex;align-items:center;justify-content:center;"><canvas id="e-dist"></canvas></div>
         <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:12px;font-weight:600;">
@@ -117,7 +151,7 @@
 
     <!-- 벤치마크 + 차량 전환 -->
     <div class="exec-section" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+      <div style="background:var(--card);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
           <div style="font-size:15.5px;font-weight:700;">5개사 절감률 벤치마크</div>
           <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">베이스라인 대비 · 7월</span>
@@ -135,7 +169,7 @@
         </div>
         <div style="border-top:1px solid var(--divider);margin-top:14px;padding-top:11px;font-size:12px;font-weight:600;color:var(--text-secondary);">에코 드라이빙 실천율 91% — 격차의 핵심은 기사 참여율이에요.</div>
       </div>
-      <div style="background:#fff;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
+      <div style="background:var(--card);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-standard);">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
           <div style="font-size:15.5px;font-weight:700;">보유 차량 · 전환 검토</div>
           <span style="font-size:11px;font-weight:700;color:var(--blue-600);background:var(--primary-weak);padding:3px 8px;border-radius:9999px;">AI Planning 연동</span>
@@ -155,15 +189,15 @@
 
     <!-- AI 경영 인사이트 -->
     <div class="exec-section" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;">
-      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
         <div style="font-size:12px;font-weight:700;color:var(--blue-600);">인센티브 ROI</div>
         <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;line-height:1.55;">인센티브 1원당 절감 효과 3.4원 — 지급 확대가 남는 투자예요.</div>
       </div>
-      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
         <div style="font-size:12px;font-weight:700;color:var(--blue-600);">보험료 협상 카드</div>
         <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;line-height:1.55;">위험 이벤트 28% 감소 — DTG 데이터로 갱신 시 보험료 인하 협상이 가능해요.</div>
       </div>
-      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;">
         <div style="font-size:12px;font-weight:700;color:var(--success);">ESG 실적</div>
         <div style="font-size:13px;font-weight:600;color:var(--text-body);margin-top:4px;line-height:1.55;">연 감축 실적은 시 평가·재정지원 가점과 KOC 크레딧 수익으로 이어져요.</div>
       </div>
@@ -203,24 +237,31 @@ class Component extends DCLogic {
     const C = window.Chart;
     if (!C) return;
     this.charts = this.charts || {};
+    const theme = document.documentElement.dataset.theme || "light";
+    if (this._chartTheme !== theme) {
+      Object.values(this.charts).forEach(c => { try { c.destroy(); } catch (e) {} });
+      this.charts = {};
+    }
     C.defaults.font.family = "Pretendard Variable, Pretendard, sans-serif";
     C.defaults.font.weight = 600;
     C.defaults.color = "#8b95a1";
+    const gridColor = theme === "dark" ? "#242b35" : "#f2f4f6";
     const saveEl = document.getElementById("e-save");
     if (saveEl && !C.getChart("e-save")) {
       this.charts["e-save"] = new C(saveEl, { type: "bar",
         data: { labels: ["2월", "3월", "4월", "5월", "6월", "7월"],
           datasets: [{ data: [612, 705, 798, 872, 963, 1065], backgroundColor: "#3182f6", borderRadius: 8, barPercentage: .55 }] },
-        options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { y: { grid: { color: "#f2f4f6" }, ticks: { callback: v => v + "만원" } }, x: { grid: { display: false } } } } });
+        options: { maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } },
+          scales: { y: { grid: { color: gridColor }, ticks: { callback: v => v + "만원" } }, x: { grid: { display: false } } } } });
     }
     const distEl = document.getElementById("e-dist");
     if (distEl && !C.getChart("e-dist")) {
       this.charts["e-dist"] = new C(distEl, { type: "doughnut",
         data: { labels: ["우수", "일반", "교육 대상"],
           datasets: [{ data: [21, 85, 9], backgroundColor: ["#03b26c", "#3182f6", "#fe9800"], borderWidth: 0 }] },
-        options: { cutout: "68%", maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+        options: { cutout: "68%", maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } } });
     }
+    if (this.charts["e-save"] || this.charts["e-dist"]) this._chartTheme = theme;
   }
 }
 </script>
